@@ -1,0 +1,38 @@
+project:
+  type: book
+
+book:
+  title: "amcat-book"
+  date: today
+  favicon: media/logo.svg
+  cover-image: https://source.unsplash.com/i4W8OINLI_I
+  repo-url:  https://github.com/ccs-amsterdam/amcat-book
+  repo-actions: [edit, issue]
+  downloads: [pdf, epub]
+  sharing: [twitter, facebook]
+  page-footer:
+      right: Proudly supported by [![](media/opted.png){fig-alt="OPTED" width=85px}](https://opted.eu/team/wp7-pre-processing-storage-and-data-sharing/)
+  chapters:
+    - index.qmd
+    - 01._why-amcat.qmd
+    - 02._getting-started.qmd
+    - 03._storage.qmd
+    - 04._sharing.qmd
+    - 05._presentation.qmd
+    - 06._addon-annotation.qmd
+    - 07._addon-pp-ml.qmd
+    - about.qmd
+    - references.qmd
+
+bibliography: references.bib
+
+format:
+  html:
+    theme: 
+      light: [cosmo, amcat.scss]
+      dark: [darkly, amcat.scss]
+  pdf:
+    documentclass: scrreprt
+
+editor: source
+

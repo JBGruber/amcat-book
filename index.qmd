@@ -1,0 +1,24 @@
+---
+bibliography: references.bib
+---
+
+# Welcome {.unnumbered}
+
+Welcome to the amcat manual.
+
+## Acknowledgments
+
+This version of the book was built with the following packages and versions:
+
+```{r}
+#| echo: false
+info <- Sys.info()
+tibble::tribble(
+  ~package, ~version,
+  "quarto", system("quarto --version", intern = TRUE),
+  "pandoc", paste0(unlist(rmarkdown::pandoc_version()), collapse = "."),
+  "operating system", paste(info["sysname"], info["release"])
+) |> 
+  knitr::kable()
+```
+

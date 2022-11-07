@@ -1,0 +1,402 @@
+---
+title: "Getting started"
+---
+
+::: {.callout-important}
+# Will change soon
+**This is work in progress.**
+Passages highlighted in red are likely to change soon.
+:::
+
+In this chapter, we show you how to set up the data layer and front-end of the amcat suite.
+
+![amcat instance after following this chapter](media/amcat-flow-getting-started.drawio.png)
+
+In the [Data Layer](#data-Layer), it is sufficient if you choose one of the sub-sections to follow.
+We explain how you can run amcat 
+
+- [on our servers](#run-on-our-servers), which we recommend for testing purposes;
+- [through a docker image](#setup-through-docker), which we recommend for most people who want to conduct a research project and/or share data online;
+- [or install amcat directly on your system](#setup-on-your-own-server), which we only recommend for advanced users, who want a customised setup.
+
+In the [Frontend](#frontend) section, it makes sense to cover the [amcat4client](#amcat4client), which provides a react web interface to query data.
+Then you can select to either install the [R](#amcat4r) or [Python](#amcat4apiclient) client.
+
+## Data Layer
+### Run on our servers
+
+::: {.callout-important}
+# Coming soon...
+:::
+
+### Setup through docker
+
+Why do we use docker for installation?
+Functionally, docker containers are a cross-platform installation format that makes it trivially easy to install software packages on Linux, MacOS and Windows without needing users to deal with dependency issues or installation quirks on different systems.^[
+Technically, it is a little different as docker containers have many similarities to virtual machines.
+However, for most users that technical background is not really important.
+If you want to learn more, have a look [here](https://www.docker.com/resources/what-container/).
+]
+A side effect is that we can easily develop amcat for all operating systems at once.
+
+If you have never used docker before, head over to [their website](https://www.docker.com/get-started/) to get started.
+
+::: {.callout-important}
+# Coming soon...
+Then you can download our docker compose file from [here]().
+:::
+
+<!-- I would advocate to put elastic and amcat4 in the same docker image. So far I thought it's better to run two separate containers but when elastic is restarted, but amcat is not, it seems amcat is unable to re-establish the connection. -->
+
+### Setup on your own server
+
+If you decide not to go with docker, for example, because you have your own server and you need more control over.
+We assume that if you are going this route, you are running a Linux server.
+Below we show one example setup.
+Obviously feel free to replace the suggested Linux tools like *systemd* or *nginx* with your own choice.
+
+#### amcat4 -- aka amcat server
+
+The first piece to set up is the amcat server and the Elasticsearch database it interacts with.
+To download and install Elasticsearch, refer to [their website](https://www.elastic.co/downloads/elasticsearch), or, preferably, install it through a package manager. 
+For example, if you are running Debian or Ubuntu or another distro which uses `apt` you can install Elasticsearch 7.x (which we are currently working with) like this:
+
+```bash
+curl -fsSL https://artifacts.elastic.co/GPG-KEY-elasticsearch | sudo gpg --dearmor -o /usr/share/keyrings/elastic.gpg
+echo "deb [signed-by=/usr/share/keyrings/elastic.gpg] https://artifacts.elastic.co/packages/7.x/apt stable main" | sudo tee -a /etc/apt/sources.list.d/elastic-7.x.list
+sudo apt update
+sudo apt install elasticsearch
+```
+
+In the next step, you need to configure Elasticsearch:
+
+```bash
+sudo nano /etc/elasticsearch/elasticsearch.yml
+```
+
+Configure the database to your own liking in terms of user management and exposure.
+Since we are controlling it through `amcat4`, the only two things that really matter is the address and port (and that `amcat4` still has access after you're done configuring Elasticsearch).
+<!-- We want Elasticsearch to only expose the port locally, I assume. How do you do that? -->
+So within `elasticsearch.yml`, we only look for two lines:
+
+```bash
+network.host: localhost
+...
+http.port: 9200
+```
+
+You can configure the memory usage of Elasticsearch
+
+```bash
+echo "-Xms4g" | sudo tee -a /etc/elasticsearch/jvm.options.d/memory.options
+```
+
+Leaving the values at their defaults here, we can enable the systemd service (skip this step if you've installed Elasticsearch through docker):
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable elasticsearch
+sudo systemctl start elasticsearch
+```
+
+You can check if everything is working with:
+
+```bash
+curl -X GET 'http://localhost:9200'
+#> {
+#>   "name" : "amcat-opted-trekdrop0",
+#>   "cluster_name" : "amcat-opted",
+#>   "cluster_uuid" : "Sx-D89zmSx2zAcwl62u32A",
+#>   "version" : {
+#>     "number" : "7.17.6",
+#>     "build_flavor" : "default",
+#>     "build_type" : "deb",
+#>     "build_hash" : "f65e9d338dc1d07b642e14a27f338990148ee5b6",
+#>     "build_date" : "2022-08-23T11:08:48.893373482Z",
+#>     "build_snapshot" : false,
+#>     "lucene_version" : "8.11.1",
+#>     "minimum_wire_compatibility_version" : "6.8.0",
+#>     "minimum_index_compatibility_version" : "6.0.0-beta1"
+#>   },
+#>   "tagline" : "You Know, for Search"
+#> } 
+```
+
+Next, you want to setup the amcat server.
+You can do this wherever you like, but will will set things up at `/srv/amcat`:
+
+```bash
+sudo git clone https://github.com/ccs-amsterdam/amcat4 /srv/amcat
+sudo chown -R $USER:$USER /srv/amcat
+cd /srv/amcat
+python3 -m venv env
+env/bin/pip install -e .[dev]
+```
+
+To test if it runs as expected, you can use:
+
+```bash
+env/bin/python -m amcat4 run
+#> /srv/amcat/env/lib/python3.9/site-packages/elasticsearch/connection/base.py:200: ElasticsearchWarning: Elasticsearch #> built-in security features are not enabled. Without authentication, your cluster could be accessible to anyone. See #> https://www.elastic.co/guide/en/elasticsearch/reference/7.17/security-minimal-setup.html to enable security.
+#>   warnings.warn(message, category=ElasticsearchWarning)
+#> [INFO   :root           ] Starting server at port 5000, debug=True
+#> INFO:     Started server process [1001112]
+#> [INFO   :uvicorn.error  ] Started server process [1001112]
+#> INFO:     Waiting for application startup.
+#> [INFO   :uvicorn.error  ] Waiting for application startup.
+#> INFO:     Application startup complete.
+#> [INFO   :uvicorn.error  ] Application startup complete.
+#> INFO:     Uvicorn running on http://0.0.0.0:5000 (Press CTRL+C to quit)
+#> [INFO   :uvicorn.error  ] Uvicorn running on http://0.0.0.0:5000 (Press CTRL+C to quit)
+```
+
+
+::: {.callout-important}
+# Will change soon
+
+To create an admin user for testing, use:
+
+```bash
+env/bin/python -m amcat4 create-admin
+```
+:::
+
+Since you probably don't want to run amcat in an open ssh tab all the time, you should set it up as a service, for example with `systemd`.
+So head over to `/etc/systemd/system` and create a new file, for example, `amcat.service`.
+
+Here is a small example to set things up:
+
+```bash
+[Unit]
+Description=Amcat4 API
+After=network.target
+Requires=elasticsearch.service
+
+[Service]
+Type=simple
+User=amcat
+Group=amcat
+WorkingDirectory=/srv/amcat/amcat4
+
+Environment=AMCAT4_ELASTIC_HOST=http://localhost:9200
+Environment=AMCAT4_DB_NAME=/srv/amcat/amcat4.db
+
+ExecStart=/srv/amcat/env/bin/uvicorn \
+        --proxy-headers \
+        --forwarded-allow-ips='*' \
+        --workers=2 \
+        --no-access-log \
+        --uds /tmp/amcat.socket \
+        --root-path /api \
+        amcat4.api:app
+
+ExecReload=/bin/kill -HUP ${MAINPID}
+RestartSec=1
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+```
+
+In the above service, we run the amcat server as the user `amcat`.
+To create this user and hand over the ownership of the amcat server folder to it use:
+
+```bash
+sudo useradd amcat
+sudo chown -R amcat:amcat /srv/amcat
+```
+
+Then you can start the service and enable it to run on startup:
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl start amcat.service
+sudo systemctl enable amcat.service
+```
+
+Now you can check if everything is working with
+
+```bash
+systemctl status amcat.service
+#> ● amcat.service - Amcat4 API
+#>      Loaded: loaded (/etc/systemd/system/amcat.service; enabled; vendor preset: enabled)
+#>      Active: active (running) since Thu 2022-11-03 10:39:23 CET; 3min 29s ago
+#>    Main PID: 197173 (uvicorn)
+#>       Tasks: 4 (limit: 33532)
+#>      Memory: 86.8M
+#>         CPU: 1.770s
+#>      CGroup: /system.slice/amcat.service
+#>              ├─197173 /srv/amcat/env/bin/python3 /srv/amcat/env/bin/uvicorn --proxy-headers --forwarded-allow-ips=* --workers=2 --no-access-log --uds /tmp/amcat.socket --root-path /api amcat4.api:app
+#>              ├─197174 /srv/amcat/env/bin/python3 -c from multiprocessing.resource_tracker import main;main(4)
+#>              ├─197175 /srv/amcat/env/bin/python3 -c from multiprocessing.spawn import spawn_main; spawn_main(tracker_fd=5, pipe_handle=7) --multiprocessing-fork
+#>              └─197176 /srv/amcat/env/bin/python3 -c from multiprocessing.spawn import spawn_main; spawn_main(tracker_fd=5, pipe_handle=9) --multiprocessing-fork
+```
+
+If something went wrong, you can troubleshoot with `sudo journalctl -eu amcat.service`.
+
+## Frontend
+### amcat4client
+
+If you have checked port 5000 of your new amcat server while testing it above (i.e., `http://0.0.0.0:5000`), you were probably disappointed by a simple `{"detail":"Not Found"}` message.
+This is because the client has been split from the main package to make it easier to develop.
+You can install the React client next to amcat in`/srv/amcat4client` using:
+
+```bash
+cd /srv/
+sudo git clone https://github.com/ccs-amsterdam/amcat4client.git
+sudo chown -R $USER: amcat4client
+cd amcat4client
+npm install
+```
+
+If you get error messages about outdated versions of dependencies (which is likely on Ubuntu and Debian) you should update `Node.js`.
+On Debian, you can do this likes so:
+
+```bash
+su
+curl -fsSL https://deb.nodesource.com/setup_19.x | bash - &&\
+apt-get install -y nodejs
+exit
+```
+
+And the equivalent on Ubuntu:
+
+```bash
+curl -fsSL https://deb.nodesource.com/setup_19.x | sudo -E bash - &&\
+sudo apt-get install -y nodejs
+```
+
+See [this repository](https://github.com/nodesource/distributions/blob/master/README.md) for instructions for other Linux flavours.
+
+After that, you can build the React app:
+
+```bash
+npm run build
+```
+
+If your amcat instance will be publicly reachable, you can build the React app permanently attached to only your instance of amcat:
+
+```bash
+REACT_APP_FIXED_HOST=https://example.com/api npm run build
+```
+
+Once this has finished, you should hand over ownership of the React application to the previously created amcat user
+
+```bash
+sudo chown -R amcat:amcat .
+```
+
+Now we have an Elasticsearch and amcat4 running. 
+But they are currently not accesible.
+To solve this, we can use, for example, `nginx` to provide users access to the React frontend and the amcat API.
+Create a new `nginx` config file with, for example, nano:
+
+```bash
+sudo nano /etc/nginx/sites-available/amcat.conf
+```
+
+Below is a minimal example of the `amcat.conf` file, which you can copy and paste:
+For more information, visit the [uvicorn documentation website](https://www.uvicorn.org/deployment/#running-behind-nginx).
+
+```bash
+server {
+    client_max_body_size 4G;
+
+    listen 5000;
+
+    location /api/ {
+      rewrite  ^/api/(.*) /$1 break;
+      proxy_set_header Host $http_host;
+      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+      proxy_set_header X-Forwarded-Proto $scheme;
+      proxy_set_header Upgrade $http_upgrade;
+      proxy_set_header Connection $connection_upgrade;
+      proxy_redirect off;
+      proxy_buffering off;
+      proxy_pass http://amcat;
+    }
+
+    location / {
+      root /srv/amcat4client/build;
+      index index.html;
+      try_files $uri $uri/ /index.html;
+    }
+
+}
+
+map $http_upgrade $connection_upgrade {
+    default upgrade;
+    '' close;
+}
+
+upstream amcat {
+    server unix:/tmp/amcat.socket;
+}
+```
+:::{.callout-warning}
+# warning about http
+
+This setup assumes that your amcat sever will only be available in the local network.
+If it should be accesible via the internet, we **strongly** recommend to enable https.
+You can find more information about that on the [`nginx` website](http://nginx.org/en/docs/http/configuring_https_servers.html) or [this guide](https://www.techrepublic.com/article/how-to-enable-ssl-on-nginx/).
+:::
+
+To enable the site, use:
+
+```bash
+sudo ln -s /etc/nginx/sites-available/amcat.conf /etc/nginx/sites-enabled/amcat.conf 
+```
+
+Then simply restart `nginx`, for example, through systemd:
+
+```bash
+sudo systemctl restart nginx.service
+```
+
+To test if the API is reachable, use this:
+
+```bash
+curl http://localhost:5000/api/
+#> {"detail":"Not Found"}
+```
+
+If everything works, you can now access the client at [http://localhost:5000](http://localhost:5000), or the address of your server, if you installed amcat remotely:
+
+![First view of the amcat react app in your browser](media/amcat-1.png)
+
+The React app is always running locally in your browser, even if you've accessed it on another computer.
+So the appropriate host needs to be the route to the amcat server.
+In the example above, I set up an amcat instance in my local network on a computer with the IP address `192.168.2.180` and port `5000`.
+To access that host, you need to enter:
+
+::: {.callout-note}
+
+Host: "http://192.168.2.180:5000/api"
+
+Email: "admin"
+
+Password: "admin"
+
+:::
+
+Just replace `192.168.2.180` with the address of the machine you set up amcat on.
+
+![After logging into the amcat react app in your browser](media/amcat-2.png)
+
+Success! However, the interface doesn't show much at this point, since we added no data yet.
+We will do that in the [storage chapter](#amcat-for-document-storage).
+
+### amcat4apiclient
+
+```bash
+pip install amcat4apiclient
+```
+
+
+### amcat4r
+
+```{r}
+#| eval: false
+remotes::install_github("ccs-amsterdam/amcat4r")
+```
+

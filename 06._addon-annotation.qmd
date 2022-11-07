@@ -1,0 +1,8 @@
+---
+title: "amcat for document annotation"
+bibliography: references.bib
+---
+
+::: {.callout-important}
+# Coming soon...
+:::

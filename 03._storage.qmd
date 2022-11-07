@@ -1,0 +1,45 @@
+---
+title: "amcat for document storage"
+bibliography: references.bib
+---
+
+::: {.callout-note}
+The minimum modules you need to use this module:
+:::
+
+## Fill your database
+
+::: {.callout-important}
+# Will change soon
+
+Currently, there is no way to add data through the web interface.
+Rather, you can add new datasets through calls to the amcat API.
+:::
+
+You can upload document to the amcat server by using our [`R` package](#manage-storage-using-r), [`Python` package](#manage-storage-using-python) or calling the [API directly](#manage-storage-using-api-calls).
+Of course, you can use the calls in the [API section]() and write an API wrapper in another language of your choice.
+Let us know about it and we will promote your package here.
+
+### Manage storage using `R`
+
+```{r eval=!require("amcat4r", quietly = TRUE)}
+remotes::install_github("ccs-amsterdam/amcat4r")
+```
+
+```{r eval=FALSE}
+library(amcat4r)
+login(host = "http://opted.amcat.nl", username = "admin")
+#> No encoding supplied: defaulting to UTF-8.
+```
+
+### Manage storage using `Python`
+
+::: {.callout-important}
+# Coming soon...
+:::
+
+### Manage storage using API calls
+
+::: {.callout-important}
+# Coming soon...
+:::

@@ -1,0 +1,13 @@
+---
+title: "Preprocessing and machine learning"
+bibliography: references.bib
+---
+
+::: {.callout-important}
+# Coming soon...
+:::
+
+## Why nlpipe?
+
+<!-- - run on server hardware -->
+<!-- - non consumptive research: can offer people that their data is preprocessed in amcat without them having access to the fulltext column -->

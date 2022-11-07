@@ -1,0 +1,36 @@
+/*-- scss:rules --*/
+// boxes to highlight text
+// Replaced with callout classes: https://quarto.org/docs/authoring/callouts.html
+.wip {
+  border-radius: 5px;
+  background: #FFBCBE;
+  padding: 10px;
+  padding-top: 25px;
+}
+
+.attentition {
+  border-radius: 5px;
+  background-color: #F57900;
+  // This icon was made by Tokyoship https://commons.wikimedia.org/wiki/User:Tokyoship and 
+  // licensed under the Creative Commons Attribution-Share Alike 3.0 Unported license 
+  // (https://creativecommons.org/licenses/by-sa/3.0/deed.en).
+  background-image: url(https://upload.wikimedia.org/wikipedia/commons/9/9a/Simple_Attention.svg);
+  background-size: 45px;
+  background-repeat: no-repeat;
+  background-position: 1% 50%;
+  padding: 10px;
+  padding-top: 25px;
+  padding-left: 60px;
+}
+
+.example {
+  font-style: italic;
+  border-radius: 5px; 
+  background: #E6EEFF;
+  padding: 10px;
+  padding-top: 25px;
+}
+
+img {
+  border: 1px solid #222222;
+}
