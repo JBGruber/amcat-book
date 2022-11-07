@@ -24,6 +24,10 @@ jobs:
         uses: r-lib/actions/setup-renv@v2
         with:
           cache-version: 1
+          
+      - name: Install tinytex for quarto
+        run: |
+          quarto install tool tinytex
       
       - name: Render and Publish
         uses: quarto-dev/quarto-actions/publish@v2
