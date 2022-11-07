@@ -395,8 +395,7 @@ pip install amcat4apiclient
 
 ### amcat4r
 
-```{r}
-#| eval: false
+```{r eval=FALSE}
 remotes::install_github("ccs-amsterdam/amcat4r")
 ```
 

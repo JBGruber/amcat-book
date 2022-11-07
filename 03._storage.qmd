@@ -22,7 +22,7 @@ Let us know about it and we will promote your package here.
 
 ### Manage storage using `R`
 
-```{r eval=!require("amcat4r", quietly = TRUE)}
+```{r eval=FALSE}
 remotes::install_github("ccs-amsterdam/amcat4r")
 ```
 
