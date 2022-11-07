@@ -3,3 +3,5 @@
 _book
 /.quarto/
 .Rhistory
+renv/
+.Rprofile
