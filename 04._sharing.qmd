@@ -1,5 +1,5 @@
 ---
-title: "amcat for document sharing"
+title: "access management and document sharing"
 bibliography: references.bib
 ---
 
@@ -7,3 +7,19 @@ bibliography: references.bib
 # Coming soon...
 :::
 
+### Manage index access using `R`
+
+```{r}
+#| eval: false
+add_index_user()
+```
+
+```{r}
+#| eval: false
+delete_index_user()
+```
+
+```{r}
+#| eval: false
+modify_index_user()
+```

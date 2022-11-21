@@ -451,18 +451,42 @@ Just replace `192.168.2.180` with the address of the machine you set up amcat on
 ![After logging into the amcat react app in your browser](media/amcat-2-remote.png)
 
 Success! However, the interface doesn't show much at this point, since we added no data yet.
-We will do that in the [storage chapter](#amcat-for-document-storage).
+We will do that in the [storage chapter](#document-storage).
 
 ### amcat4apiclient
+
+Install `amcat4apiclient` from the command line trhough `pip`:
 
 ```bash
 pip install amcat4apiclient
 ```
+The you can open Python and log in:
 
+```{python}
+#| eval: false
+import json
+from amcat4apiclient.amcat4apiclient import AmcatClient
+
+amcat = AmcatClient("http://localhost/api", "admin", "supergeheim")
+```
+
+If this does not throw an error, you have set everything up correctly.
 
 ### amcat4r
 
-```{r eval=FALSE}
+Install `amcat4r` using the following command in `R` (install `remotes` first if you don't have it yet):
+
+```{r}
+#| eval: false
 remotes::install_github("ccs-amsterdam/amcat4r")
 ```
 
+If you have set up the amcat suite as shown above, you should be able to log into the database:
+
+```{r}
+#| eval: false
+library(amcat4r)
+login("http://localhost/api",  username = "admin", password = "supergeheim")
+```
+
+If this does not throw an error, you have set everything up correctly.

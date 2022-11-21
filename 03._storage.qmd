@@ -1,10 +1,16 @@
 ---
-title: "amcat for document storage"
+title: "document storage"
+execute:
+  freeze: auto
 bibliography: references.bib
 ---
 
 ::: {.callout-note}
-The minimum modules you need to use this module:
+The minimum modules you need to work with document storage:
+
+![amcat instance after following this chapter](media/amcat-flow-getting-started.drawio.png)
+
+You need either the [R](#amcat4r) or [Python](#amcat4apiclient) package, not both.
 :::
 
 ## Fill your database
@@ -22,15 +28,143 @@ Let us know about it and we will promote your package here.
 
 ### Manage storage using `R`
 
-```{r eval=FALSE}
-remotes::install_github("ccs-amsterdam/amcat4r")
+To manage data from `R`, we provide several functions in the `amcat4r` package.
+For this overview, I log into a local `amcat4` (i.e., `http://localhost/api`).
+Replace this with the address to the `amcat4` instance you are working with (e.g., `https://opted.amcat.nl/api`).
+
+We first need to log in:
+
+```{r}
+library(amcat4r)
+login("http://localhost/api",  username = "admin", password = "supergeheim")
 ```
 
-```{r eval=FALSE}
-library(amcat4r)
-login(host = "http://opted.amcat.nl", username = "admin")
-#> No encoding supplied: defaulting to UTF-8.
+```{r}
+#| include: false
+# clean up previous run
+if ("state_of_the_union" %in% list_indexes()$name) {
+  delete_index(index = "state_of_the_union")
+  system(command = "docker exec amcat4 amcat4 create-test-index")
+}
 ```
+
+
+If you are using RStudio, you can omit the `password` argument and enter it instead through the RStudio password dialogue.
+
+We can first list all available indexes, as a document collection is called in Elasticsearch and thus in amcat:
+
+```{r}
+list_indexes()
+```
+
+You can see that the test index we added in the [Data Layer](#data-layer) section is here and that it is called "state_of_the_union".
+We can see who has access to this index: 
+
+```{r}
+list_index_users(index = "state_of_the_union")
+```
+
+To see what an index looks like, we can query it leaving all fields blank to request all data at once:
+
+```{r}
+sotu <- query_documents(index = "state_of_the_union", fields = NULL)
+str(sotu)
+```
+
+Knowing now what a document should look like in this index, we can upload a new document to get familiar with the process:
+
+```{r}
+new_doc <- data.frame(
+  title = "test",
+  text = "test",
+  date = as.Date("2022-01-01"),
+  president = "test",
+  year = 2022,
+  party = "test",
+  url = "test"
+)
+upload_documents(index = "state_of_the_union", new_doc)
+```
+
+Let's see if the the new document is in the index:
+
+```{r}
+query_documents(index = "state_of_the_union", fields = NULL, filters = list(title = "test"))
+```
+
+We will learn more about queries later on in the [Writing a Query]() chapter.
+For now, you can look at the documentation using `?query_documents`.
+
+Instead of adding whole documents, you can also change fields in an index.
+Fields are similar to columns in an `R` data frame.
+However, you need to define the type of a field upon its creation and make sure that you later only add data which adheres to the specifications of the type.
+To learn more about the fields in the test index, you can use:
+
+```{r}
+get_fields(index = "state_of_the_union")
+```
+
+You can see that there are five different types in this index: date, keyword, text, url and double.
+Keyword, text, url are all essentially the same type in `R`, namely character strings.
+The date needs to be a `POSIXct` class, which you can create with `as.Date`.
+Year should be a double, i.e., a numeric value or integer.
+
+You can add new fields to this, for example, if you want to add a keyword to the documents:
+
+```{r}
+set_fields(index = "state_of_the_union", list(keyword = "keyword"))
+```
+
+When you now query a document, however, you will not see this new field:
+
+```{r}
+query_documents(index = "state_of_the_union", fields = NULL, filters = list(title = "test"))
+```
+
+This is because it is empty for this document, just as the url field, which is absent from all documents in this index.
+We can add something to the new field and see if it shows up>
+
+```{r}
+update_tags(index = "state_of_the_union", action = "add", field = "keyword", tag = "test", filters = list(title = "test"))
+query_documents(index = "state_of_the_union", fields = c("title", "keyword"), filters = list(title = "test"))
+```
+
+Now that we have a better idea of what and index is and how it looks like, we can create a new one>
+
+```{r}
+create_index(index = "new_index", guest_role = "admin")
+list_indexes()
+get_fields(index = "new_index")
+```
+
+As you can see, the newly created index already contains fields.
+You could now manually define new fields to fit your data.
+Or you can simply start uploading data:
+
+```{r}
+new_doc <- data.frame(
+  title = "test",
+  text = "test",
+  date = as.Date("2022-01-01"),
+  president = "test",
+  year = 2022,
+  party = "test",
+  url = "test"
+)
+upload_documents(index = "new_index", new_doc)
+get_fields(index = "new_index")
+```
+
+amcat4 guesses the types of fields based on the data.
+You can see here that this might not be the best option if you care about data types: party and president have been created as text, when they should be keywords; year is now a long type instead of double or integer. 
+<!-- TODO: Why should people care about types? -->
+
+Finally, we can also delete an index:
+
+```{r}
+delete_index(index = "new_index")
+```
+
 
 ### Manage storage using `Python`
 
