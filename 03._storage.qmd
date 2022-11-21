@@ -1,7 +1,7 @@
 ---
 title: "document storage"
 execute:
-  freeze: auto
+  freeze: true
 bibliography: references.bib
 ---
 
@@ -44,6 +44,8 @@ login("http://localhost/api",  username = "admin", password = "supergeheim")
 # clean up previous run
 if ("state_of_the_union" %in% list_indexes()$name) {
   delete_index(index = "state_of_the_union")
+  system(command = "docker exec amcat4 amcat4 create-test-index")
+} else {
   system(command = "docker exec amcat4 amcat4 create-test-index")
 }
 ```
