@@ -6,9 +6,9 @@ book:
   date: today
   favicon: media/logo.svg
   cover-image: https://source.unsplash.com/i4W8OINLI_I
-  repo-url:  https://github.com/ccs-amsterdam/amcat-book
+  repo-url:  https://github.com/JBGruber/amcat-book
   repo-actions: [edit, issue]
-  downloads: [pdf, epub]
+  downloads: [pdf]
   sharing: [twitter, facebook]
   page-footer:
       right: Proudly supported by [![](media/opted.png){fig-alt="OPTED" width=85px}](https://opted.eu/team/wp7-pre-processing-storage-and-data-sharing/)
