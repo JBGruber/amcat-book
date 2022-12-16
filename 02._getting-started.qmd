@@ -42,21 +42,14 @@ A side effect is that we can easily develop amcat for all operating systems at o
 :::
 
 If you have never used Docker before, the first step is to install the infrastructure on your system.
-Head over to the Docker website to get [Docker Desktop](https://docs.docker.com/get-docker/) or just the [Docker Engine](https://docs.docker.com/engine/install/) to use Docker from the command line.
+Head over to the Docker website to get [Docker Desktop](https://docs.docker.com/get-docker/) or the [Docker Engine](https://docs.docker.com/engine/install/) and [Docker Compose](https://docs.docker.com/compose/install/) to use Docker from the command line.
+We do not really need Docker Desktop, but it comes with both the Docker Engine and Docker Compose, which makes installation easier if you do not use a package manager (which many Windows and MacOS users do not).
 
 To install the amcat data layer, you should use our Docker Compose file.
-You can get it from [here](https://raw.githubusercontent.com/JBGruber/amcat4docker/main/docker-compose.yml).
-Now you have two options to set this up, which are explained in the next two sections:
-you can use  [Docker Desktop](#setup-from-docker-desktop) to change the default configuration to meet your needs, or you can edit the Docker Compose file in a text editor and [use the command line to run our containers](#setup-from-command-line).
-You can also mix the approach and edit the Docker Compose file before running it through the Desktop application.
+You can get it from [here](https://raw.githubusercontent.com/JBGruber/amcat4docker/main/docker-compose.yml) (save the file as `docker-compose.yml`).
 
-#### Setup from Docker Desktop
-
-::: {.callout-important}
-# Coming soon...
-:::
-
-#### Setup from command line
+::: {.callout-note collapse=true}
+#### Customization
 
 The current default docker-compose.yml looks like this:
 
@@ -73,18 +66,76 @@ knitr::asis_output(paste0(
 ))
 ```
 
+Setting the containers up from `R` or `Python` uses the same settings.
 You can leave most lines as they are, but we want to draw your attention to a couple of settings you might want to change:
 
 - In lines `r grep("restart:", docker_compose)`, we have commented out `restart: unless-stopped`. This is for testing purposes. You should remove the `# ` to activate the setting, once the containers are working properly (i.e., not crashing) so amcat will restart after rebooting your system or crashing.
 - In lines `r grep("ports:", docker_compose):(grep("ports:", docker_compose) + 1)`, we set the port to `80` on the host machine. This means you will be able to access the amcat client without specifying a port. If the port is already in use, the conainter will crash. In this case, change `80`to a different port and access amcat through, for example, `localhost:5000`.
 - In lines `r grep("discovery.type", docker_compose):(grep("ES_JAVA_OPTS", docker_compose))`, we configured Elasticsearch to form a single-node cluster and use a maximum of 4GB memory.
 - In lines `r grep("volumes:", docker_compose):(grep("volumes:", docker_compose) + 1)` we suggested a setting so Elasticsearch will store your data on a volume on the host machine. We recommend this to make it easier to back up your database and reuse it with a different installation of Elasticsearch (e.g., after an update) in the future. However, the container will not run if it does not have proper access to this folder. See the comment to solve this.
+:::
 
-When you are happy with your settings, simply run the following command to download and start the three containers (Elasticsearch, amcat4, and amcat4client):
+To download and start the amcat containers (Elasticsearch, amcat4, and amcat4client) use one of the approaches below:
+
+::: {.panel-tabset}
+#### Command Line
+
+Start a terminal and navigate to the directory where you downloaded the docker-compose.yml file:
 
 ```bash
 docker-compose up --pull="missing" -d
 ```
+
+Check if the containers are running with:
+
+```bash
+docker ps
+#> CONTAINER ID   IMAGE                                                  COMMAND                  CREATED              STATUS          PORTS                                   NAMES
+#> 0628bc852c79   ccsamsterdam/amcat4client:0.0.1                        "nginx -g 'daemon of…"   About a minute ago   Up 58 seconds   0.0.0.0:80->5000/tcp, :::80->5000/tcp   amcat4client
+#> 8134bcd1cbe8   ccsamsterdam/amcat4:0.0.1                              "./wait-for-it.sh el…"   About a minute ago   Up 59 seconds   5000/tcp                                amcat4
+#> 2d59e128e748   docker.elastic.co/elasticsearch/elasticsearch:7.17.7   "/bin/tini -- /usr/l…"   About a minute ago   Up 59 seconds   9200/tcp, 9300/tcp                      elastic7
+```
+
+#### R
+
+```r
+# install the required packages first:
+# remotes::install_github("JBGruber/dockr")
+# remotes::install_github("ccs-amsterdam/amcat4r")
+amcatr::run_amcat_docker()
+```
+
+This pulls downloads the default `docker-compose.yml` file from the same link as above.
+If you want to change the file first, just supply the path to the function afterwards:
+
+```r
+amcatr::run_amcat_docker("docker-compose.yml")
+```
+
+Check if the containers are running with:
+
+```r
+amcatr::docker_lc()
+#> # A tibble: 3 × 5
+#>   name          image                                                status        id                                       ports
+#>   <chr>         <chr>                                                <chr>         <chr>                                    <list>
+#> 1 /amcat4client ccsamsterdam/amcat4client:0.0.1                      Up 58 seconds 0628bc852c79b88a9047034cc5a03867e1d00fc… <list>
+#> 2 /amcat4       ccsamsterdam/amcat4:0.0.1                            Up 59 seconds 8134bcd1cbe82bb6c0cb8beb10df1e3a03ddc8f… <list>
+#> 3 /elastic7     docker.elastic.co/elasticsearch/elasticsearch:7.17.7 Up 58 seconds 2d59e128e748fa6ac4f5023945b5b7ab28f7ac2… <list>
+```
+
+
+#### Python
+
+```python
+# coming soon
+```
+
+:::
+
+If you are using Docker Desktop, you also monitor the containers there:
+
+![All containers are running](media/docker-dektop-running.png)
 
 It might take a couple of seconds for Elasticsearch to start up.
 Then you can navigate to [[localhost](http://localhost)](http://localhost/) in your browser to access the amcat client.
@@ -96,16 +147,51 @@ Then you can navigate to [[localhost](http://localhost)](http://localhost/) in y
 
 To access your newly created amcat suite, you will first need to create an admin user (note, the second `amcat4` is not a typo, but the command, while the first one is the name of the container):
 
+
+::: {.panel-tabset}
+#### Command Line
+
 ```bash
 docker exec -it amcat4 amcat4 create-admin --username admin --password supergeheim
 ```
+
+#### R
+
+```r
+docker_exec(id = "amcat4", "amcat4 create-admin --username admin --password supergeheim")
+```
+
+#### Python
+
+```python
+# coming soon
+```
+
+:::
 :::
 
-You can also create an example data collection (called index in Elasticsearch):
+You can also create an example data collection (which are called index in Elasticsearch):
 
-``` bash
+::: {.panel-tabset}
+#### Command Line
+
+```bash
 docker exec -it amcat4 amcat4 create-test-index
 ```
+
+#### R
+
+```r
+docker_exec(id = "amcat4", "amcat4 create-test-index")
+```
+
+#### Python
+
+```python
+# coming soon
+```
+
+:::
 
 Now you can access this index using the user name and password above and `http://localhost/api` as the host:
 
@@ -113,7 +199,7 @@ Now you can access this index using the user name and password above and `http:/
 
 ### Setup on your own server
 
-If you decide not to go with Docker, for example, because you have your own server and you need more control over.
+If you decide not to go with Docker, for example, because you have your own server and you need more control over, you can also run amcat on your system directly.
 We assume that if you are going this route, you are running a Linux server.
 Below we show one example setup.
 Obviously feel free to replace the suggested Linux tools like *systemd* or *nginx* with your own choice.
@@ -281,7 +367,7 @@ Now you can check if everything is working with
 
 ```bash
 systemctl status amcat.service
-#> ● amcat.service - Amcat4 API
+● amcat.service - Amcat4 API
 #>      Loaded: loaded (/etc/systemd/system/amcat.service; enabled; vendor preset: enabled)
 #>      Active: active (running) since Thu 2022-11-03 10:39:23 CET; 3min 29s ago
 #>    Main PID: 197173 (uvicorn)
@@ -301,7 +387,9 @@ If something went wrong, you can troubleshoot with `sudo journalctl -eu amcat.se
 ### amcat4client
 
 ::: {.callout-note}
-If you are using amcat on our servers or through docker, you can skip this section and either the [R](#amcat4r) or [Python](#amcat4apiclient) client to start managing amcat.
+If you are using amcat on our servers or through docker, you can skip this section and move on to install an API client to start managing amcat
+
+either the [R](#amcat4r) or [Python](#amcat4apiclient) client to start managing amcat.
 :::
 
 If you have checked port 5000 of your new amcat server while testing it above (i.e., `http://0.0.0.0:5000`), you were probably disappointed by a simple `{"detail":"Not Found"}` message.
@@ -453,7 +541,30 @@ Just replace `192.168.2.180` with the address of the machine you set up amcat on
 Success! However, the interface doesn't show much at this point, since we added no data yet.
 We will do that in the [storage chapter](#document-storage).
 
-### amcat4apiclient
+### API Client
+
+::: {.panel-tabset}
+#### R
+
+The `R` client is called `amcat4r` and can be installed via the following command in `R` (install `remotes` first if you don't have it yet):
+
+```r
+#| eval: false
+remotes::install_github("ccs-amsterdam/amcat4r")
+```
+
+If you have set up the amcat suite as shown above, you should be able to log into the database:
+
+```r
+#| eval: false
+library(amcat4r)
+login("http://localhost/api",  username = "admin", password = "supergeheim")
+```
+
+If this does not throw an error, you have set everything up correctly.
+
+
+#### Python
 
 Install `amcat4apiclient` from the command line trhough `pip`:
 
@@ -472,21 +583,4 @@ amcat = AmcatClient("http://localhost/api", "admin", "supergeheim")
 
 If this does not throw an error, you have set everything up correctly.
 
-### amcat4r
-
-Install `amcat4r` using the following command in `R` (install `remotes` first if you don't have it yet):
-
-```{r}
-#| eval: false
-remotes::install_github("ccs-amsterdam/amcat4r")
-```
-
-If you have set up the amcat suite as shown above, you should be able to log into the database:
-
-```{r}
-#| eval: false
-library(amcat4r)
-login("http://localhost/api",  username = "admin", password = "supergeheim")
-```
-
-If this does not throw an error, you have set everything up correctly.
+:::

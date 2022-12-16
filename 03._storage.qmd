@@ -1,9 +1,17 @@
 ---
-title: "document storage"
+title: "Document Storage"
 execute:
   freeze: true
 bibliography: references.bib
 ---
+
+```{r setup, include=FALSE}
+amcat4r::run_amcat_docker(force_install = 1)
+Sys.sleep(30)
+dockr::docker_exec(id = "amcat4", "amcat4 create-admin --username admin --password supergeheim")
+dockr::docker_exec(id = "amcat4", "amcat4 create-test-index")
+```
+
 
 ::: {.callout-note}
 The minimum modules you need to work with document storage:
@@ -39,18 +47,6 @@ library(amcat4r)
 login("http://localhost/api",  username = "admin", password = "supergeheim")
 ```
 
-```{r}
-#| include: false
-# clean up previous run
-if ("state_of_the_union" %in% list_indexes()$name) {
-  delete_index(index = "state_of_the_union")
-  system(command = "docker exec amcat4 amcat4 create-test-index")
-} else {
-  system(command = "docker exec amcat4 amcat4 create-test-index")
-}
-```
-
-
 If you are using RStudio, you can omit the `password` argument and enter it instead through the RStudio password dialogue.
 
 We can first list all available indexes, as a document collection is called in Elasticsearch and thus in amcat:
@@ -81,11 +77,15 @@ new_doc <- data.frame(
   text = "test",
   date = as.Date("2022-01-01"),
   president = "test",
-  year = 2022,
+  year = 2022L,
   party = "test",
   url = "test"
 )
 upload_documents(index = "state_of_the_union", new_doc)
+```
+
+```{r include=FALSE}
+Sys.sleep(15)
 ```
 
 Let's see if the the new document is in the index:
@@ -124,14 +124,14 @@ query_documents(index = "state_of_the_union", fields = NULL, filters = list(titl
 ```
 
 This is because it is empty for this document, just as the url field, which is absent from all documents in this index.
-We can add something to the new field and see if it shows up>
+We can add something to the new field and see if it shows up:
 
 ```{r}
 update_tags(index = "state_of_the_union", action = "add", field = "keyword", tag = "test", filters = list(title = "test"))
 query_documents(index = "state_of_the_union", fields = c("title", "keyword"), filters = list(title = "test"))
 ```
 
-Now that we have a better idea of what and index is and how it looks like, we can create a new one>
+Now that we have a better idea of what an index is and how it looks like, we can create a new one>
 
 ```{r}
 create_index(index = "new_index", guest_role = "admin")

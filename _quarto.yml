@@ -31,6 +31,8 @@ format:
     theme: 
       light: [cosmo, amcat.scss]
       dark: [darkly, amcat.scss]
+    link-external-icon: true
+    link-external-newwindow: true
   pdf:
     documentclass: scrreprt
 
