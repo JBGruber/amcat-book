@@ -161,6 +161,11 @@ curl -s http://localhost/api/index/state_of_the_union/documents \
 # show the first few characters only
 head -c 150 sotu.json
 ```
+
+```{r include=FALSE}
+unlink("sotu.json")
+```
+
 :::
 
 Knowing now what a document should look like in this index, we can upload a new document to get familiar with the process:
@@ -295,9 +300,9 @@ set_fields(index = "state_of_the_union", list(keyword = "keyword"))
 
 #### Python
 
-<!-- not yet implemented -->
 ```{python}
 #| eval: false
+amcat.set_fields("state_of_the_union", {"keyword":"keyword"})
 ```
 
 #### cURL
@@ -345,7 +350,11 @@ We can add something to the new field and see if it shows up:
 #### R
 
 ```{r}
-update_tags(index = "state_of_the_union", action = "add", field = "keyword", tag = "test", filters = list(title = "test"))
+update_tags(index = "state_of_the_union", 
+            action = "add", 
+            field = "keyword", 
+            tag = "test", 
+            filters = list(title = "test"))
 ```
 
 ```{r include=FALSE}
@@ -353,12 +362,13 @@ Sys.sleep(5)
 ```
 
 ```{r}
-query_documents(index = "state_of_the_union", fields = c("title", "keyword"), filters = list(title = "test"))
+query_documents(index = "state_of_the_union", 
+                fields = c("title", "keyword"),
+                filters = list(title = "test"))
 ```
 
 #### Python
 
-<!-- not yet implemented -->
 ```{python}
 #| eval: false
 test_doc = list(amcat.query("state_of_the_union", fields=["id"], filters={"title": "test"}))[0]
@@ -378,14 +388,18 @@ test_doc=$(curl -s -X POST http://localhost/api/index/state_of_the_union/query \
   -H "Authorization: Bearer ${AMCAT_TOKEN}" \
   -H 'Content-Type: application/json' \
   -d '{"filters":{"title":["test"]}}' | jq -r ".results[]._id")
-```
-
-
-```{bash}
 curl -s -X PUT http://localhost/api/index/state_of_the_union/documents/${test_doc} \
   -H "Authorization: Bearer ${AMCAT_TOKEN}" \
   -H 'Content-Type: application/json' \
   -d '{"keyword": "test"}'
+```
+
+
+```{bash}
+curl -s -X POST http://localhost/api/index/state_of_the_union/query \
+  -H "Authorization: Bearer ${AMCAT_TOKEN}" \
+  -H 'Content-Type: application/json' \
+  -d '{"filters":{"title":["test"]}}'
 ```
 :::
 
