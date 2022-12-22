@@ -1,11 +1,11 @@
 ---
 title: "Document Storage"
 execute:
-  freeze: true
+  freeze: auto
 bibliography: references.bib
 ---
 
-```{r setup, include=FALSE}
+```{r cleanstart, include=FALSE}
 amcat4r::run_amcat_docker(force_install = 1)
 Sys.sleep(30)
 dockr::docker_exec(id = "amcat4", "amcat4 create-admin --username admin --password supergeheim")
@@ -14,70 +14,167 @@ dockr::docker_exec(id = "amcat4", "amcat4 create-test-index")
 
 
 ::: {.callout-note}
-The minimum modules you need to work with document storage:
+You need at least the modules in the Data Layer and one Frontend Client to work with document storage:
 
 ![amcat instance after following this chapter](media/amcat-flow-getting-started.drawio.png)
 
-You need either the [R](#amcat4r) or [Python](#amcat4apiclient) package, not both.
 :::
 
-## Fill your database
+This chapter covers how you can upload, change, query and delete documents and indexes on the amcat server.
+Only a few tasks are implemented in the [Web user interface](#manage-documents-with-a-client), which means you will need to use [one of the clients](#manage-documents-with-a-client) in `R` or `Python` or another means to call the API (e.g., through [cURL](https://en.wikipedia.org/wiki/CURL) as shown below).
+You can also use the API calls to build your own client.
+More information on the API can be found on every amcat4 instance at `/redoc` (e.g., <http://localhost/api/redoc>).
+Let us know about it and we will promote your new API wrapper package here.
+
+## Manage Documents With the Web Interface
+
+::: {.callout-important}
+# Coming soon...
+:::
 
 ::: {.callout-important}
 # Will change soon
 
-Currently, there is no way to add data through the web interface.
-Rather, you can add new datasets through calls to the amcat API.
+Currently, there is no way to upload, change, or delete documents and indexes through the web interface.
+Rather, you can add new datasets through [calls to the amcat API](#manage-documents-with-a-client).
 :::
 
-You can upload document to the amcat server by using our [`R` package](#manage-storage-using-r), [`Python` package](#manage-storage-using-python) or calling the [API directly](#manage-storage-using-api-calls).
-Of course, you can use the calls in the [API section]() and write an API wrapper in another language of your choice.
-Let us know about it and we will promote your package here.
+## Manage Documents With a Client
 
-### Manage storage using `R`
-
-To manage data from `R`, we provide several functions in the `amcat4r` package.
-For this overview, I log into a local `amcat4` (i.e., `http://localhost/api`).
+For this overview, we log into a local `amcat4` (i.e., `http://localhost/api`).
 Replace this with the address to the `amcat4` instance you are working with (e.g., `https://opted.amcat.nl/api`).
 
 We first need to log in:
 
+::: {.panel-tabset}
+
+#### R
 ```{r}
 library(amcat4r)
-login("http://localhost/api",  username = "admin", password = "supergeheim")
+amcat_auth("http://localhost/api",  username = "admin", password = "supergeheim", cache = 1L)
 ```
 
 If you are using RStudio, you can omit the `password` argument and enter it instead through the RStudio password dialogue.
 
+#### Python
+
+```{python}
+import json
+from amcat4apiclient.amcat4apiclient import AmcatClient
+amcat = AmcatClient("http://localhost/api", "admin", "supergeheim")
+```
+
+#### cURL
+
+We extract the token from the retrieved JSON using the jq package.
+This assumes you are using the terminal on a unix-like system.
+
+```{bash}
+AMCAT_TOKEN=$(curl -s -d "username=admin&password=supergeheim" -X POST http://localhost/api/auth/token | jq -r ".access_token")
+```
+
+```{r echo=FALSE}
+# the above is not actually saved bc knitr invokes a new bash session next time
+Sys.setenv(AMCAT_TOKEN = system('curl -s -d "username=admin&password=supergeheim" -X POST http://localhost/api/auth/token | jq -r ".access_token"', 
+                                intern = TRUE))
+```
+:::
+
 We can first list all available indexes, as a document collection is called in Elasticsearch and thus in amcat:
 
+::: {.panel-tabset}
+
+#### R
 ```{r}
 list_indexes()
 ```
 
+#### Python
+
+```{python}
+amcat.list_indices()
+```
+
+#### cURL
+
+```{bash}
+curl -s http://localhost/api/index/ \
+  -H "Authorization: Bearer ${AMCAT_TOKEN}"
+```
+:::
+
 You can see that the test index we added in the [Data Layer](#data-layer) section is here and that it is called "state_of_the_union".
-We can see who has access to this index: 
+The `role` information here refers to the guest role, which means what access to the index a user has if they are granted no specific rights.
+For this special case of an index, a guest user can do everything to this index, including deleting in.
+We will learn more about these roles in the chapter on [access management](#document-sharing-and-access-management).
+To see everyone who has been granted access to an index (beyond the guest role) we can use:
+
+::: {.panel-tabset}
+
+#### R
 
 ```{r}
 list_index_users(index = "state_of_the_union")
 ```
 
+#### Python
+
+<!-- seems to be missing -->
+```{python}
+
+```
+
+#### cURL
+
+```{bash}
+curl -s http://localhost/api/index/state_of_the_union/users \
+  -H "Authorization: Bearer ${AMCAT_TOKEN}"
+```
+:::
+
 To see what an index looks like, we can query it leaving all fields blank to request all data at once:
 
+::: {.panel-tabset}
+
+#### R
 ```{r}
-sotu <- query_documents(index = "state_of_the_union", fields = NULL)
+sotu <- query_documents(index = "state_of_the_union", queries = NULL, fields = NULL)
 str(sotu)
 ```
 
+#### Python
+
+```{python}
+sotu = list(amcat.query("state_of_the_union", fields=None))
+print(len(sotu))
+for k, v in sotu[1].items():
+  print(k + "(" + str(type(v)) + "): " + str(v)[0:100] + "...")
+```
+
+#### cURL
+
+To not clog the output, we save it into file and diplay only the beginning:
+
+```{bash}
+curl -s http://localhost/api/index/state_of_the_union/documents \
+  -H "Authorization: Bearer ${AMCAT_TOKEN}" > sotu.json
+# show the first few characters only
+head -c 150 sotu.json
+```
+:::
+
 Knowing now what a document should look like in this index, we can upload a new document to get familiar with the process:
 
+::: {.panel-tabset}
+
+#### R
 ```{r}
 new_doc <- data.frame(
   title = "test",
   text = "test",
   date = as.Date("2022-01-01"),
   president = "test",
-  year = 2022L,
+  year = "2022",
   party = "test",
   url = "test"
 )
@@ -85,26 +182,102 @@ upload_documents(index = "state_of_the_union", new_doc)
 ```
 
 ```{r include=FALSE}
-Sys.sleep(15)
+Sys.sleep(5)
 ```
+
+#### Python
+
+```{python}
+#| eval: false
+from datetime import datetime
+new_doc = {
+  "title": "test",
+  "text": "test",
+  "date": datetime.strptime("2022-01-01", '%Y-%m-%d'),
+  "president": "test",
+  "year": "2022",
+  "party": "test",
+  "url": "test"
+}
+amcat.upload_documents("state_of_the_union", [new_doc])
+```
+
+#### cURL
+
+```{bash}
+#| eval: false
+curl -s -X POST http://localhost/api/index/state_of_the_union/documents \
+  -H "Authorization: Bearer ${AMCAT_TOKEN}" \
+  -H "Content-Type: application/json" \
+  -d '{
+         "documents":[
+            {
+               "title":"test",
+               "text":"test",
+               "date":"2022-01-01",
+               "president":"test",
+               "year":"2022",
+               "party":"test",
+               "url":"test"
+            }
+         ]
+      }'
+```
+:::
 
 Let's see if the the new document is in the index:
 
+::: {.panel-tabset}
+
+#### R
 ```{r}
 query_documents(index = "state_of_the_union", fields = NULL, filters = list(title = "test"))
 ```
 
+#### Python
+
+```{python}
+res=list(amcat.query("state_of_the_union", fields=None, filters={"title": "test"}))
+print(res)
+```
+
+#### cURL
+
+```{bash}
+curl -s -X POST http://localhost/api/index/state_of_the_union/query \
+  -H "Authorization: Bearer ${AMCAT_TOKEN}" \
+  -H 'Content-Type: application/json' \
+  -d '{"filters":{"title":["test"]}}'
+```
+:::
+
 We will learn more about queries later on in the [Writing a Query]() chapter.
-For now, you can look at the documentation using `?query_documents`.
 
 Instead of adding whole documents, you can also change fields in an index.
-Fields are similar to columns in an `R` data frame.
-However, you need to define the type of a field upon its creation and make sure that you later only add data which adheres to the specifications of the type.
+Fields are similar to columns in a table in Excel.
+However, you need to define the type of a field upon its creation and make sure that you later only add data which adheres to the specifications of the type (otherwise you will get an error).
 To learn more about the fields in the test index, you can use:
 
+::: {.panel-tabset}
+
+#### R
 ```{r}
 get_fields(index = "state_of_the_union")
 ```
+
+#### Python
+
+```{python}
+amcat.get_fields("state_of_the_union")
+```
+
+#### cURL
+
+```{bash}
+curl -s http://localhost/api/index/state_of_the_union/fields \
+  -H "Authorization: Bearer ${AMCAT_TOKEN}"
+```
+:::
 
 You can see that there are five different types in this index: date, keyword, text, url and double.
 Keyword, text, url are all essentially the same type in `R`, namely character strings.
@@ -113,25 +286,114 @@ Year should be a double, i.e., a numeric value or integer.
 
 You can add new fields to this, for example, if you want to add a keyword to the documents:
 
+::: {.panel-tabset}
+
+#### R
 ```{r}
 set_fields(index = "state_of_the_union", list(keyword = "keyword"))
 ```
 
+#### Python
+
+<!-- not yet implemented -->
+```{python}
+#| eval: false
+```
+
+#### cURL
+
+```{bash}
+#| eval: false
+curl -s -X POST http://localhost/api/index/state_of_the_union/fields \
+  -H "Authorization: Bearer ${AMCAT_TOKEN}" \
+  -H 'Content-Type: application/json' \
+  -d '{"keyword":"keyword"}'
+```
+:::
+
 When you now query a document, however, you will not see this new field:
 
+::: {.panel-tabset}
+
+#### R
 ```{r}
 query_documents(index = "state_of_the_union", fields = NULL, filters = list(title = "test"))
 ```
 
+#### Python
+
+```{python}
+res=list(amcat.query("state_of_the_union", fields=None, filters={"title": "test"}))
+print(res)
+```
+
+#### cURL
+
+```{bash}
+curl -s -X POST http://localhost/api/index/state_of_the_union/query \
+  -H "Authorization: Bearer ${AMCAT_TOKEN}" \
+  -H 'Content-Type: application/json' \
+  -d '{"filters":{"title":["test"]}}'
+```
+:::
+
 This is because it is empty for this document, just as the url field, which is absent from all documents in this index.
 We can add something to the new field and see if it shows up:
 
+::: {.panel-tabset}
+
+#### R
+
 ```{r}
 update_tags(index = "state_of_the_union", action = "add", field = "keyword", tag = "test", filters = list(title = "test"))
+```
+
+```{r include=FALSE}
+Sys.sleep(5)
+```
+
+```{r}
 query_documents(index = "state_of_the_union", fields = c("title", "keyword"), filters = list(title = "test"))
 ```
 
+#### Python
+
+<!-- not yet implemented -->
+```{python}
+#| eval: false
+test_doc = list(amcat.query("state_of_the_union", fields=["id"], filters={"title": "test"}))[0]
+amcat.update_document("state_of_the_union", doc_id=test_doc["_id"], body={"keyword": "test"})
+```
+
+```{python}
+res=list(amcat.query("state_of_the_union", fields=None, filters={"title": "test"}))
+print(res)
+```
+
+#### cURL
+
+```{bash}
+#| eval: false
+test_doc=$(curl -s -X POST http://localhost/api/index/state_of_the_union/query \
+  -H "Authorization: Bearer ${AMCAT_TOKEN}" \
+  -H 'Content-Type: application/json' \
+  -d '{"filters":{"title":["test"]}}' | jq -r ".results[]._id")
+```
+
+
+```{bash}
+curl -s -X PUT http://localhost/api/index/state_of_the_union/documents/${test_doc} \
+  -H "Authorization: Bearer ${AMCAT_TOKEN}" \
+  -H 'Content-Type: application/json' \
+  -d '{"keyword": "test"}'
+```
+:::
+
 Now that we have a better idea of what an index is and how it looks like, we can create a new one>
+
+::: {.panel-tabset}
+
+#### R
 
 ```{r}
 create_index(index = "new_index", guest_role = "admin")
@@ -139,9 +401,47 @@ list_indexes()
 get_fields(index = "new_index")
 ```
 
+#### Python
+
+```{python}
+#| eval: false
+amcat.create_index(index="new_index", guest_role="admin")
+```
+
+```{python}
+amcat.list_indices()
+amcat.get_fields("new_index")
+```
+
+#### cURL
+
+```{bash}
+#| eval: false
+curl -s -X POST http://localhost/api/index/ \
+  -H "Authorization: Bearer ${AMCAT_TOKEN}" \
+  -H 'Content-Type: application/json' \
+  -d '{
+        "name": "new_index",
+        "guest_role": "ADMIN"
+      }'
+```
+
+```{bash}
+curl -s http://localhost/api/index/ \
+  -H "Authorization: Bearer ${AMCAT_TOKEN}"
+curl -s http://localhost/api/index/new_index/fields \
+  -H "Authorization: Bearer ${AMCAT_TOKEN}"
+```
+
+:::
+
 As you can see, the newly created index already contains fields.
 You could now manually define new fields to fit your data.
 Or you can simply start uploading data:
+
+::: {.panel-tabset}
+
+#### R
 
 ```{r}
 new_doc <- data.frame(
@@ -149,33 +449,92 @@ new_doc <- data.frame(
   text = "test",
   date = as.Date("2022-01-01"),
   president = "test",
-  year = 2022,
+  year = "2022",
   party = "test",
   url = "test"
 )
 upload_documents(index = "new_index", new_doc)
+```
+
+```{r}
 get_fields(index = "new_index")
 ```
 
-amcat4 guesses the types of fields based on the data.
+#### Python
+
+```{python}
+#| eval: false
+new_doc = {
+  "title": "test",
+  "text": "test",
+  "date": datetime.strptime("2022-01-01", '%Y-%m-%d'),
+  "president": "test",
+  "year": "2022",
+  "party": "test",
+  "url": "test"
+}
+amcat.upload_documents("new_index", [new_doc])
+```
+
+```{python}
+amcat.get_fields("new_index")
+```
+
+
+#### cURL
+
+```{bash}
+#| eval: false
+curl -s -X POST http://localhost/api/index/new_index/documents \
+  -H "Authorization: Bearer ${AMCAT_TOKEN}" \
+  -H "Content-Type: application/json" \
+  -d '{
+         "documents":[
+            {
+               "title":"test",
+               "text":"test",
+               "date":"2022-01-01",
+               "president":"test",
+               "year":"2022",
+               "party":"test",
+               "url":"test"
+            }
+         ]
+      }'
+```
+
+```{bash}
+curl -s http://localhost/api/index/new_index/fields \
+  -H "Authorization: Bearer ${AMCAT_TOKEN}"
+```
+
+:::
+
+`amcat4` guesses the types of fields based on the data.
 You can see here that this might not be the best option if you care about data types: party and president have been created as text, when they should be keywords; year is now a long type instead of double or integer. 
 <!-- TODO: Why should people care about types? -->
 
 Finally, we can also delete an index:
 
+::: {.panel-tabset}
+
+#### R
 ```{r}
 delete_index(index = "new_index")
 ```
 
+#### Python
 
-### Manage storage using `Python`
+```{python}
+#| eval: false
+amcat.delete_index("new_index")
+```
 
-::: {.callout-important}
-# Coming soon...
-:::
+#### cURL
 
-### Manage storage using API calls
-
-::: {.callout-important}
-# Coming soon...
+```{bash}
+#| eval: false
+curl -s -X DELETE http://localhost/api/index/new_index \
+  -H "Authorization: Bearer ${AMCAT_TOKEN}"
+```
 :::

@@ -133,7 +133,7 @@ amcatr::docker_lc()
 
 :::
 
-If you are using Docker Desktop, you also monitor the containers there:
+If you are using Docker Desktop, you can also monitor the containers there:
 
 ![All containers are running](media/docker-dektop-running.png)
 
