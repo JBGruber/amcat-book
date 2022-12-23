@@ -1,7 +1,12 @@
 ---
-title: "amcat for document presentation"
+title: "Public Document Presentation"
 bibliography: references.bib
 ---
+
+Sharing documents with your collaborators and research assistants is not the only scenario in which you want to make documents available to others.
+Sometimes, you want to share a document collection with a wider public.
+Whether you want to make the full-text documents available or just let users discover frequencies of terms and word combinations in your text, a dashboard built on top of amcat can be the solution.
+This chapter introduces you to how you can build a dashboard on top of amcat.
 
 ::: {.callout-important}
 # Coming soon...

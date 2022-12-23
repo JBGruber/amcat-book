@@ -13,7 +13,7 @@ You decide to dig deeper into the content and start training coders and deploy c
 
 After writing up a paper, you submit your results to a journal. The editor asks for replication code and data, so you simply share your R or Python scripts and grant temporary access to your amcat server for a researcher tasked with replicating your results. 
 
-After publication, a newspaper picks up your results, leading some interesting citizens to play with your dashboard. Even though users do not have access to the full text for copyright reasons, they can query different combinations of keywords, which makes your research transparent for a wider audience. Since the annotations and the preprocessed texts are also available, someone finds they get even better validation scores using a newly created algorithm.
+After publication, a newspaper picks up your results, leading some interested citizens to play with your dashboard. Even though users do not have access to the full text for copyright reasons, they can query different combinations of keywords, which makes your research transparent for a wider audience. Since the annotations and the preprocessed texts are also available, someone finds they get even better validation scores using a newly created algorithm.
 :::
 
 ## What is amcat?

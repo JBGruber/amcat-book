@@ -19,8 +19,9 @@ book:
     - 03._storage.qmd
     - 04._sharing.qmd
     - 05._presentation.qmd
-    - 06._addon-annotation.qmd
-    - 07._addon-pp-ml.qmd
+    - 06._searching.qmd
+    - 07._addon-annotation.qmd
+    - 08._addon-pp-ml.qmd
     - about.qmd
     - references.qmd
 

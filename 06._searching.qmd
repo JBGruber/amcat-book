@@ -1,0 +1,10 @@
+---
+title: "Fast searches in amcat databses"
+bibliography: references.bib
+---
+
+<!-- http://wiki.amcat.nl/3.4:Creating_search_strings -->
+
+::: {.callout-important}
+# Coming soon...
+:::

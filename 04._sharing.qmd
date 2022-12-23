@@ -1,5 +1,7 @@
 ---
-title: "access management and document sharing"
+title: "Document Sharing and Access Management"
+execute:
+  eval: false
 bibliography: references.bib
 ---
 
@@ -7,7 +9,33 @@ bibliography: references.bib
 # Coming soon...
 :::
 
-### Manage index access using `R`
+## Cat-in-the-middle authentication
+
+## Access Management
+
+### Creating and Deleting User Accounts
+
+
+```{r}
+list_users()
+```
+
+```{r}
+#| eval: false
+create_user(
+  email = "user@example.com",
+  password = "test",
+  global_role = "writer",
+  index_access = "state_of_the_union"
+)
+```
+
+While you are here, it probably makes sense to change the admin password to something secure:
+
+```{r}
+#| eval: false
+modify_user(email = "admin", new_password = "a")
+```
 
 ```{r}
 #| eval: false
@@ -23,3 +51,6 @@ delete_index_user()
 #| eval: false
 modify_index_user()
 ```
+
+### Roles and Guest Roles
+
