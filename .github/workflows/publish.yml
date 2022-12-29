@@ -38,8 +38,10 @@ jobs:
           cache-version: 1
       
       - name: Setup reticulate
-        run: reticulate::virtualenv_create("r-reticulate", Sys.which("python"))
         shell: Rscript {0}
+        run: |
+          install.packages('reticulate')
+          reticulate::virtualenv_create("r-reticulate", Sys.which("python"))
           
       - name: Render and Publish
         uses: quarto-dev/quarto-actions/publish@v2
