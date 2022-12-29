@@ -34,8 +34,10 @@ jobs:
           quarto install tool tinytex
       
       - name: Install missing reticulate
+        # use chainsawriot's fix for miniconda
         run: |
-          Rscript -e "install.packages('reticulate')"
+          Rscript -e "install.packages('remotes')"
+          Rscript -e "remotes::install_github('chainsawriot/reticulate')"
           Rscript -e "reticulate::install_miniconda()"
           
       - name: Render and Publish
