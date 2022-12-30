@@ -49,9 +49,15 @@ We first need to log in:
 ::: {.panel-tabset}
 
 #### R
-```{r}
+
+```{r, eval=FALSE}
 library(amcat4r)
-amcat_auth("http://localhost/api",  username = "admin", password = "supergeheim", cache = 1L)
+amcat_auth("http://localhost/api", username = "admin", password = "supergeheim")
+```
+
+```{r, echo=FALSE}
+library(amcat4r)
+amcat_auth("http://localhost/api", username = "admin", password = "supergeheim", force_refresh = TRUE, cache = 1L)
 ```
 
 If you are using RStudio, you can omit the `password` argument and enter it instead through the RStudio password dialogue.
@@ -66,8 +72,8 @@ amcat = AmcatClient("http://localhost/api", "admin", "supergeheim")
 
 #### cURL
 
-We extract the token from the retrieved JSON using the jq package.
-This assumes you are using the terminal on a unix-like system.
+We extract the token from the retrieved JSON using the [jq package](https://stedolan.github.io/jq/), which we will later also use for printing.
+This assumes you are using the terminal on a Unix-like system.
 
 ```{bash}
 AMCAT_TOKEN=$(curl -s -d "username=admin&password=supergeheim" -X POST http://localhost/api/auth/token | jq -r ".access_token")
@@ -242,8 +248,10 @@ query_documents(index = "state_of_the_union", fields = NULL, filters = list(titl
 #### Python
 
 ```{python}
+import pprint
+pp = pprint.PrettyPrinter(depth=4)
 res=list(amcat.query("state_of_the_union", fields=None, filters={"title": "test"}))
-print(res)
+pp.pprint(res)
 ```
 
 #### cURL
@@ -252,7 +260,7 @@ print(res)
 curl -s -X POST http://localhost/api/index/state_of_the_union/query \
   -H "Authorization: Bearer ${AMCAT_TOKEN}" \
   -H 'Content-Type: application/json' \
-  -d '{"filters":{"title":["test"]}}'
+  -d '{"filters":{"title":["test"]}}' | jq -r ".results"
 ```
 :::
 
@@ -329,7 +337,7 @@ query_documents(index = "state_of_the_union", fields = NULL, filters = list(titl
 
 ```{python}
 res=list(amcat.query("state_of_the_union", fields=None, filters={"title": "test"}))
-print(res)
+pp.pprint(res)
 ```
 
 #### cURL
@@ -338,7 +346,7 @@ print(res)
 curl -s -X POST http://localhost/api/index/state_of_the_union/query \
   -H "Authorization: Bearer ${AMCAT_TOKEN}" \
   -H 'Content-Type: application/json' \
-  -d '{"filters":{"title":["test"]}}'
+  -d '{"filters":{"title":["test"]}}' | jq -r ".results"
 ```
 :::
 
@@ -377,7 +385,7 @@ amcat.update_document("state_of_the_union", doc_id=test_doc["_id"], body={"keywo
 
 ```{python}
 res=list(amcat.query("state_of_the_union", fields=None, filters={"title": "test"}))
-print(res)
+pp.pprint(res)
 ```
 
 #### cURL
@@ -399,7 +407,7 @@ curl -s -X PUT http://localhost/api/index/state_of_the_union/documents/${test_do
 curl -s -X POST http://localhost/api/index/state_of_the_union/query \
   -H "Authorization: Bearer ${AMCAT_TOKEN}" \
   -H 'Content-Type: application/json' \
-  -d '{"filters":{"title":["test"]}}'
+  -d '{"filters":{"title":["test"]}}' | jq -r ".results"
 ```
 :::
 
@@ -552,3 +560,202 @@ curl -s -X DELETE http://localhost/api/index/new_index \
   -H "Authorization: Bearer ${AMCAT_TOKEN}"
 ```
 :::
+
+### A Note on the ID Field and Duplicated Documents
+
+amcat indexes can have all kinds of fields, yet one special field must be present in every document of every index: a unique ID.
+This ID is usually not that noteworthy, since the user does not really need to take care of it.
+This changes, however, with the special case of duplicated documents, that is, a document with the exact same information in the same fields.
+amcat does not normally check if your documents are duplicated when you upload them.
+However, when no ID is present in an uploaded document, as in the example we uploaded above, amcat will construct a unique ID from the available data of a document.
+Let us have another look at that document we titled "test":
+
+::: {.panel-tabset}
+
+#### R
+
+```{r}
+query_documents(index = "state_of_the_union", fields = NULL, filters = list(title = "test"))
+```
+
+#### Python
+
+```{python}
+res=list(amcat.query("state_of_the_union", fields=None, filters={"title": "test"}))
+pp.pprint(res)
+```
+
+#### cURL
+
+```{bash}
+curl -s -X POST http://localhost/api/index/state_of_the_union/query \
+  -H "Authorization: Bearer ${AMCAT_TOKEN}" \
+  -H 'Content-Type: application/json' \
+  -d '{"filters":{"title":["test"]}}' | jq -r ".results"
+```
+:::
+
+Note that amcat has automatically added an `_id` field (in `R` it is `.id` due to naming conventions) to the document.
+If we would upload the same document again, the algorithm that constructs the `_id` field would come up with the same value and the document would be replaced by the newly uploaded document.
+If we wanted to keep a duplicate for some reason, we could accomplish that by either changing at least one value in a field or by assigning an ID column manually:
+
+::: {.panel-tabset}
+
+#### R
+```{r}
+new_doc <- data.frame(
+  .id = "1",
+  title = "test",
+  text = "test",
+  date = as.Date("2022-01-01"),
+  president = "test",
+  year = "2022",
+  party = "test",
+  url = "test"
+)
+upload_documents(index = "state_of_the_union", new_doc)
+```
+
+```{r include=FALSE}
+Sys.sleep(5)
+```
+
+```{r}
+query_documents(index = "state_of_the_union", fields = NULL, filters = list(title = "test"))
+```
+
+#### Python
+
+```{python}
+#| eval: false
+from datetime import datetime
+new_doc = {
+  "_id": "1",
+  "title": "test",
+  "text": "test",
+  "date": datetime.strptime("2022-01-01", '%Y-%m-%d'),
+  "president": "test",
+  "year": "2022",
+  "party": "test",
+  "url": "test"
+}
+amcat.upload_documents("state_of_the_union", [new_doc])
+```
+
+```{python}
+res=list(amcat.query("state_of_the_union", fields=None, filters={"title": "test"}))
+pp.pprint(res)
+```
+
+
+#### cURL
+
+```{bash}
+#| eval: false
+curl -s -X POST http://localhost/api/index/state_of_the_union/documents \
+  -H "Authorization: Bearer ${AMCAT_TOKEN}" \
+  -H "Content-Type: application/json" \
+  -d '{
+        "documents":[
+          {
+            "_id": "1",
+            "title":"test",
+            "text":"test",
+            "date":"2022-01-01",
+            "president":"test",
+            "year":"2022",
+            "party":"test",
+            "url":"test"
+          }
+        ]
+      }'
+```
+
+```{bash}
+curl -s -X POST http://localhost/api/index/state_of_the_union/query \
+  -H "Authorization: Bearer ${AMCAT_TOKEN}" \
+  -H 'Content-Type: application/json' \
+  -d '{"filters":{"title":["test"]}}' | jq -r ".results"
+```
+:::
+
+As you can see, we now have the example document in the index twice -- although with different IDs.
+To simulate what would have happened without an ID, or rather if the ID had been constructed automatically, we can upload different data, but with the same ID to see what changes:
+
+::: {.panel-tabset}
+
+#### R
+```{r}
+new_doc <- data.frame(
+  .id = "1",
+  title = "test",
+  text = "A second test",
+  date = as.Date("2022-01-02"),
+  president = "test",
+  year = "2022"
+)
+upload_documents(index = "state_of_the_union", new_doc)
+```
+
+```{r include=FALSE}
+Sys.sleep(5)
+```
+
+```{r}
+query_documents(index = "state_of_the_union", fields = NULL, filters = list(title = "test"))
+```
+
+#### Python
+
+```{python}
+#| eval: false
+from datetime import datetime
+new_doc = {
+  "_id": "1",
+  "title": "test",
+  "text": "A second test",
+  "date": datetime.strptime("2022-01-02", '%Y-%m-%d'),
+  "president": "test",
+  "year": "2022"
+}
+amcat.upload_documents("state_of_the_union", [new_doc])
+```
+
+```{python}
+res=list(amcat.query("state_of_the_union", fields=None, filters={"title": "test"}))
+pp.pprint(res)
+```
+
+#### cURL
+
+```{bash}
+#| eval: false
+curl -s -X POST http://localhost/api/index/state_of_the_union/documents \
+  -H "Authorization: Bearer ${AMCAT_TOKEN}" \
+  -H "Content-Type: application/json" \
+  -d '{
+        "documents":[
+          {
+            "_id": "1",
+            "title":"test",
+            "text":"A second test",
+            "date":"2022-01-02",
+            "president":"test",
+            "year":"2022"
+          }
+        ]
+      }'
+```
+
+```{bash}
+curl -s -X POST http://localhost/api/index/state_of_the_union/query \
+  -H "Authorization: Bearer ${AMCAT_TOKEN}" \
+  -H 'Content-Type: application/json' \
+  -d '{"filters":{"title":["test"]}}' | jq -r ".results"
+```
+:::
+
+The document with the ID 1 has been replaced with the new data.
+This is the normal behavior of amcat: when we tell it to add data to an already present document, identified by the ID, it will be replaced.
+If a field was present in the old document, but not in the data it is replaced with, this field will be empty afterwards.
+

@@ -26,8 +26,8 @@
       "RemoteRepo": "amcat4r",
       "RemoteUsername": "ccs-amsterdam",
       "RemoteRef": "HEAD",
-      "RemoteSha": "1b98241c099e43505c799adfe247462d4b49861f",
-      "Hash": "ea997c4d16a828705483dc1379cdecb5",
+      "RemoteSha": "68d34545d4ff34d5a3e05e5eec0f96272cd496dd",
+      "Hash": "32426ce222fa519984293632f7b086eb",
       "Requirements": [
         "cli",
         "dockr",

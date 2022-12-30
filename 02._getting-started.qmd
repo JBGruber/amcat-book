@@ -102,20 +102,20 @@ docker ps
 # install the required packages first:
 # remotes::install_github("JBGruber/dockr")
 # remotes::install_github("ccs-amsterdam/amcat4r")
-amcatr::run_amcat_docker()
+amcat4r::run_amcat_docker()
 ```
 
 This pulls downloads the default `docker-compose.yml` file from the same link as above.
 If you want to change the file first, just supply the path to the function afterwards:
 
 ```r
-amcatr::run_amcat_docker("docker-compose.yml")
+amcat4r::run_amcat_docker("docker-compose.yml")
 ```
 
 Check if the containers are running with:
 
 ```r
-amcatr::docker_lc()
+amcat4r::docker_lc()
 #> # A tibble: 3 × 5
 #>   name          image                                                status        id                                       ports
 #>   <chr>         <chr>                                                <chr>         <chr>                                    <list>
