@@ -8,7 +8,8 @@ bibliography: references.bib
 ```{r cleanstart, include=FALSE}
 amcat4r::run_amcat_docker(force_install = 1)
 Sys.sleep(30)
-dockr::docker_exec(id = "amcat4", "amcat4 create-admin --username admin --password supergeheim")
+dockr::docker_exec(id = "amcat4", "amcat4 add-admin admin")
+dockr::docker_exec(id = "amcat4", "amcat4 create-env -a admin -p supergeheim")
 dockr::docker_exec(id = "amcat4", "amcat4 create-test-index")
 ```
 
@@ -23,7 +24,7 @@ You need at least the modules in the Data Layer and one Frontend Client to work 
 This chapter covers how you can upload, change, query and delete documents and indexes on the amcat server.
 Only a few tasks are implemented in the [Web user interface](#manage-documents-with-a-client), which means you will need to use [one of the clients](#manage-documents-with-a-client) in `R` or `Python` or another means to call the API (e.g., through [cURL](https://en.wikipedia.org/wiki/CURL) as shown below).
 You can also use the API calls to build your own client.
-More information on the API can be found on every amcat4 instance at `/redoc` (e.g., <http://localhost/api/redoc>).
+More information on the API can be found on every amcat4 instance at `/redoc` (e.g., <http://localhost/amcat/redoc>).
 Let us know about it and we will promote your new API wrapper package here.
 
 ## Manage Documents With the Web Interface
@@ -41,7 +42,7 @@ Rather, you can add new datasets through [calls to the amcat API](#manage-docume
 
 ## Manage Documents With a Client
 
-For this overview, we log into a local `amcat4` (i.e., `http://localhost/api`).
+For this overview, we log into a local `amcat4` (i.e., `http://localhost/amcat`).
 Replace this with the address to the `amcat4` instance you are working with (e.g., `https://opted.amcat.nl/api`).
 
 We first need to log in:
@@ -52,12 +53,12 @@ We first need to log in:
 
 ```{r, eval=FALSE}
 library(amcat4r)
-amcat_auth("http://localhost/api", username = "admin", password = "supergeheim")
+amcat_auth("http://localhost/amcat", username = "admin", password = "supergeheim")
 ```
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, message=FALSE}
 library(amcat4r)
-amcat_auth("http://localhost/api", username = "admin", password = "supergeheim", force_refresh = TRUE, cache = 1L)
+amcat_auth("http://localhost/amcat", username = "admin", password = "supergeheim", force_refresh = TRUE, cache = 1L)
 ```
 
 If you are using RStudio, you can omit the `password` argument and enter it instead through the RStudio password dialogue.
@@ -65,9 +66,8 @@ If you are using RStudio, you can omit the `password` argument and enter it inst
 #### Python
 
 ```{python}
-import json
 from amcat4apiclient.amcat4apiclient import AmcatClient
-amcat = AmcatClient("http://localhost/api", "admin", "supergeheim")
+amcat = AmcatClient("http://localhost/amcat", username="admin", password="supergeheim", force_refresh=True)
 ```
 
 #### cURL
@@ -76,12 +76,12 @@ We extract the token from the retrieved JSON using the [jq package](https://sted
 This assumes you are using the terminal on a Unix-like system.
 
 ```{bash}
-AMCAT_TOKEN=$(curl -s -d "username=admin&password=supergeheim" -X POST http://localhost/api/auth/token | jq -r ".access_token")
+AMCAT_TOKEN=$(curl -s -d "username=admin&password=supergeheim" -X POST http://localhost/amcat/auth/token | jq -r ".access_token")
 ```
 
 ```{r echo=FALSE}
 # the above is not actually saved bc knitr invokes a new bash session next time
-Sys.setenv(AMCAT_TOKEN = system('curl -s -d "username=admin&password=supergeheim" -X POST http://localhost/api/auth/token | jq -r ".access_token"', 
+Sys.setenv(AMCAT_TOKEN = system('curl -s -d "username=admin&password=supergeheim" -X POST http://localhost/amcat/auth/token | jq -r ".access_token"', 
                                 intern = TRUE))
 ```
 :::
@@ -104,16 +104,15 @@ amcat.list_indices()
 #### cURL
 
 ```{bash}
-curl -s http://localhost/api/index/ \
+curl -s http://localhost/amcat/index/ \
   -H "Authorization: Bearer ${AMCAT_TOKEN}"
 ```
 :::
 
 You can see that the test index we added in the [Data Layer](#data-layer) section is here and that it is called "state_of_the_union".
-The `role` information here refers to the guest role, which means what access to the index a user has if they are granted no specific rights.
-For this special case of an index, a guest user can do everything to this index, including deleting in.
-We will learn more about these roles in the chapter on [access management](#document-sharing-and-access-management).
-To see everyone who has been granted access to an index (beyond the guest role) we can use:
+<!-- The `role` information here refers to the guest role, which means what access to the index a user has if they are granted no specific rights. -->
+<!-- For this special case of an index, a guest user can do everything to this index, including deleting in. -->
+To see everyone who has been granted access to an index we can use:
 
 ::: {.panel-tabset}
 
@@ -125,19 +124,19 @@ list_index_users(index = "state_of_the_union")
 
 #### Python
 
-<!-- seems to be missing -->
 ```{python}
-
+amcat.list_index_users(index="state_of_the_union")
 ```
 
 #### cURL
 
 ```{bash}
-curl -s http://localhost/api/index/state_of_the_union/users \
+curl -s http://localhost/amcat/index/state_of_the_union/users \
   -H "Authorization: Bearer ${AMCAT_TOKEN}"
 ```
 :::
 
+We will learn more about these roles in the chapter on [access management](#document-sharing-and-access-management).
 To see what an index looks like, we can query it leaving all fields blank to request all data at once:
 
 ::: {.panel-tabset}
@@ -162,7 +161,7 @@ for k, v in sotu[1].items():
 To not clog the output, we save it into file and diplay only the beginning:
 
 ```{bash}
-curl -s http://localhost/api/index/state_of_the_union/documents \
+curl -s http://localhost/amcat/index/state_of_the_union/documents \
   -H "Authorization: Bearer ${AMCAT_TOKEN}" > sotu.json
 # show the first few characters only
 head -c 150 sotu.json
@@ -217,7 +216,7 @@ amcat.upload_documents("state_of_the_union", [new_doc])
 
 ```{bash}
 #| eval: false
-curl -s -X POST http://localhost/api/index/state_of_the_union/documents \
+curl -s -X POST http://localhost/amcat/index/state_of_the_union/documents \
   -H "Authorization: Bearer ${AMCAT_TOKEN}" \
   -H "Content-Type: application/json" \
   -d '{
@@ -257,7 +256,7 @@ pp.pprint(res)
 #### cURL
 
 ```{bash}
-curl -s -X POST http://localhost/api/index/state_of_the_union/query \
+curl -s -X POST http://localhost/amcat/index/state_of_the_union/query \
   -H "Authorization: Bearer ${AMCAT_TOKEN}" \
   -H 'Content-Type: application/json' \
   -d '{"filters":{"title":["test"]}}' | jq -r ".results"
@@ -287,7 +286,7 @@ amcat.get_fields("state_of_the_union")
 #### cURL
 
 ```{bash}
-curl -s http://localhost/api/index/state_of_the_union/fields \
+curl -s http://localhost/amcat/index/state_of_the_union/fields \
   -H "Authorization: Bearer ${AMCAT_TOKEN}"
 ```
 :::
@@ -317,7 +316,7 @@ amcat.set_fields("state_of_the_union", {"keyword":"keyword"})
 
 ```{bash}
 #| eval: false
-curl -s -X POST http://localhost/api/index/state_of_the_union/fields \
+curl -s -X POST http://localhost/amcat/index/state_of_the_union/fields \
   -H "Authorization: Bearer ${AMCAT_TOKEN}" \
   -H 'Content-Type: application/json' \
   -d '{"keyword":"keyword"}'
@@ -343,7 +342,7 @@ pp.pprint(res)
 #### cURL
 
 ```{bash}
-curl -s -X POST http://localhost/api/index/state_of_the_union/query \
+curl -s -X POST http://localhost/amcat/index/state_of_the_union/query \
   -H "Authorization: Bearer ${AMCAT_TOKEN}" \
   -H 'Content-Type: application/json' \
   -d '{"filters":{"title":["test"]}}' | jq -r ".results"
@@ -392,11 +391,11 @@ pp.pprint(res)
 
 ```{bash}
 #| eval: false
-test_doc=$(curl -s -X POST http://localhost/api/index/state_of_the_union/query \
+test_doc=$(curl -s -X POST http://localhost/amcat/index/state_of_the_union/query \
   -H "Authorization: Bearer ${AMCAT_TOKEN}" \
   -H 'Content-Type: application/json' \
   -d '{"filters":{"title":["test"]}}' | jq -r ".results[]._id")
-curl -s -X PUT http://localhost/api/index/state_of_the_union/documents/${test_doc} \
+curl -s -X PUT http://localhost/amcat/index/state_of_the_union/documents/${test_doc} \
   -H "Authorization: Bearer ${AMCAT_TOKEN}" \
   -H 'Content-Type: application/json' \
   -d '{"keyword": "test"}'
@@ -404,7 +403,7 @@ curl -s -X PUT http://localhost/api/index/state_of_the_union/documents/${test_do
 
 
 ```{bash}
-curl -s -X POST http://localhost/api/index/state_of_the_union/query \
+curl -s -X POST http://localhost/amcat/index/state_of_the_union/query \
   -H "Authorization: Bearer ${AMCAT_TOKEN}" \
   -H 'Content-Type: application/json' \
   -d '{"filters":{"title":["test"]}}' | jq -r ".results"
@@ -439,7 +438,7 @@ amcat.get_fields("new_index")
 
 ```{bash}
 #| eval: false
-curl -s -X POST http://localhost/api/index/ \
+curl -s -X POST http://localhost/amcat/index/ \
   -H "Authorization: Bearer ${AMCAT_TOKEN}" \
   -H 'Content-Type: application/json' \
   -d '{
@@ -449,9 +448,9 @@ curl -s -X POST http://localhost/api/index/ \
 ```
 
 ```{bash}
-curl -s http://localhost/api/index/ \
+curl -s http://localhost/amcat/index/ \
   -H "Authorization: Bearer ${AMCAT_TOKEN}"
-curl -s http://localhost/api/index/new_index/fields \
+curl -s http://localhost/amcat/index/new_index/fields \
   -H "Authorization: Bearer ${AMCAT_TOKEN}"
 ```
 
@@ -507,7 +506,7 @@ amcat.get_fields("new_index")
 
 ```{bash}
 #| eval: false
-curl -s -X POST http://localhost/api/index/new_index/documents \
+curl -s -X POST http://localhost/amcat/index/new_index/documents \
   -H "Authorization: Bearer ${AMCAT_TOKEN}" \
   -H "Content-Type: application/json" \
   -d '{
@@ -526,7 +525,7 @@ curl -s -X POST http://localhost/api/index/new_index/documents \
 ```
 
 ```{bash}
-curl -s http://localhost/api/index/new_index/fields \
+curl -s http://localhost/amcat/index/new_index/fields \
   -H "Authorization: Bearer ${AMCAT_TOKEN}"
 ```
 
@@ -556,7 +555,7 @@ amcat.delete_index("new_index")
 
 ```{bash}
 #| eval: false
-curl -s -X DELETE http://localhost/api/index/new_index \
+curl -s -X DELETE http://localhost/amcat/index/new_index \
   -H "Authorization: Bearer ${AMCAT_TOKEN}"
 ```
 :::
@@ -588,7 +587,7 @@ pp.pprint(res)
 #### cURL
 
 ```{bash}
-curl -s -X POST http://localhost/api/index/state_of_the_union/query \
+curl -s -X POST http://localhost/amcat/index/state_of_the_union/query \
   -H "Authorization: Bearer ${AMCAT_TOKEN}" \
   -H 'Content-Type: application/json' \
   -d '{"filters":{"title":["test"]}}' | jq -r ".results"
@@ -652,7 +651,7 @@ pp.pprint(res)
 
 ```{bash}
 #| eval: false
-curl -s -X POST http://localhost/api/index/state_of_the_union/documents \
+curl -s -X POST http://localhost/amcat/index/state_of_the_union/documents \
   -H "Authorization: Bearer ${AMCAT_TOKEN}" \
   -H "Content-Type: application/json" \
   -d '{
@@ -672,7 +671,7 @@ curl -s -X POST http://localhost/api/index/state_of_the_union/documents \
 ```
 
 ```{bash}
-curl -s -X POST http://localhost/api/index/state_of_the_union/query \
+curl -s -X POST http://localhost/amcat/index/state_of_the_union/query \
   -H "Authorization: Bearer ${AMCAT_TOKEN}" \
   -H 'Content-Type: application/json' \
   -d '{"filters":{"title":["test"]}}' | jq -r ".results"
@@ -730,7 +729,7 @@ pp.pprint(res)
 
 ```{bash}
 #| eval: false
-curl -s -X POST http://localhost/api/index/state_of_the_union/documents \
+curl -s -X POST http://localhost/amcat/index/state_of_the_union/documents \
   -H "Authorization: Bearer ${AMCAT_TOKEN}" \
   -H "Content-Type: application/json" \
   -d '{
@@ -748,7 +747,7 @@ curl -s -X POST http://localhost/api/index/state_of_the_union/documents \
 ```
 
 ```{bash}
-curl -s -X POST http://localhost/api/index/state_of_the_union/query \
+curl -s -X POST http://localhost/amcat/index/state_of_the_union/query \
   -H "Authorization: Bearer ${AMCAT_TOKEN}" \
   -H 'Content-Type: application/json' \
   -d '{"filters":{"title":["test"]}}' | jq -r ".results"

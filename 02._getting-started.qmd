@@ -152,13 +152,15 @@ To access your newly created amcat suite, you will first need to create an admin
 #### Command Line
 
 ```bash
-docker exec -it amcat4 amcat4 create-admin --username admin --password supergeheim
+docker exec -it amcat4 amcat4 add-admin admin
+docker exec -it amcat4 amcat4 create-env -a admin -p supergeheim
 ```
 
 #### R
 
 ```r
-docker_exec(id = "amcat4", "amcat4 create-admin --username admin --password supergeheim")
+dockr::docker_exec(id = "amcat4", "amcat4 add-admin admin")
+dockr::docker_exec(id = "amcat4", "amcat4 create-env -a admin -p supergeheim")
 ```
 
 #### Python

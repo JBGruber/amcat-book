@@ -26,8 +26,8 @@
       "RemoteRepo": "amcat4r",
       "RemoteUsername": "ccs-amsterdam",
       "RemoteRef": "HEAD",
-      "RemoteSha": "68d34545d4ff34d5a3e05e5eec0f96272cd496dd",
-      "Hash": "32426ce222fa519984293632f7b086eb",
+      "RemoteSha": "969e17957e836baa98b58f05c52d6f35b3d53b0a",
+      "Hash": "2079c78672e0cc48356a54d218c0e28c",
       "Requirements": [
         "cli",
         "dockr",
@@ -91,10 +91,10 @@
     },
     "cli": {
       "Package": "cli",
-      "Version": "3.5.0",
+      "Version": "3.6.0",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "eb9fc121ad9a1075c471107ef185be46",
+      "Hash": "3177a5a16c243adc199ba33117bd9657",
       "Requirements": []
     },
     "cpp11": {
@@ -115,10 +115,10 @@
     },
     "curl": {
       "Package": "curl",
-      "Version": "4.3.3",
+      "Version": "5.0.0",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "0eb86baa62f06e8855258fa5a8048667",
+      "Hash": "e4f97056611e8e6b8b852d13b7400cf1",
       "Requirements": []
     },
     "digest": {
@@ -138,8 +138,8 @@
       "RemoteRepo": "dockr",
       "RemoteUsername": "JBGruber",
       "RemoteRef": "HEAD",
-      "RemoteSha": "2ebbb053ddd1f65eb8b8af32963dddda0d0142cd",
-      "Hash": "f0d116a56d204e039e87973305735a48",
+      "RemoteSha": "98961b499dcc836fea2a478ceedba543fd50d0e0",
+      "Hash": "c48e6d3955e34949eb5e6415ea113359",
       "Requirements": [
         "cli",
         "httr2",
@@ -442,10 +442,10 @@
     },
     "purrr": {
       "Package": "purrr",
-      "Version": "1.0.0",
+      "Version": "1.0.1",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "1ad491d27989ec6c26a2918ad6df116b",
+      "Hash": "d71c815267c640f17ddbf7f16144b4bb",
       "Requirements": [
         "cli",
         "lifecycle",
@@ -572,10 +572,10 @@
     },
     "timechange": {
       "Package": "timechange",
-      "Version": "0.1.1",
+      "Version": "0.2.0",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "4657195cc632097bb8d140d626b519fb",
+      "Hash": "8548b44f79a35ba1791308b61e6012d7",
       "Requirements": [
         "cpp11"
       ]
