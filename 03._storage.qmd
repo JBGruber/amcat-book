@@ -65,10 +65,16 @@ If you are using RStudio, you can omit the `password` argument and enter it inst
 
 #### Python
 
-```{python}
+```{python, eval=FALSE}
+from amcat4apiclient.amcat4apiclient import AmcatClient
+amcat = AmcatClient("http://localhost/amcat", username="admin", password="supergeheim")
+```
+
+```{python, echo=FALSE, message=FALSE}
 from amcat4apiclient.amcat4apiclient import AmcatClient
 amcat = AmcatClient("http://localhost/amcat", username="admin", password="supergeheim", force_refresh=True)
 ```
+
 
 #### cURL
 

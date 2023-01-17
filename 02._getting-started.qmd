@@ -80,7 +80,7 @@ To download and start the amcat containers (Elasticsearch, amcat4, and amcat4cli
 ::: {.panel-tabset}
 #### Command Line
 
-Start a terminal and navigate to the directory where you downloaded the docker-compose.yml file:
+Start a terminal and navigate to the directory where you downloaded the docker-compose.yml file^[The yaml file is written for Docker Compose V2. If you are having trouble, check your version with `docker-compose --version`. [Get the newest version as described here.](https://docs.docker.com/compose/install/other/)]:
 
 ```bash
 docker-compose up --pull="missing" -d
@@ -138,7 +138,7 @@ If you are using Docker Desktop, you can also monitor the containers there:
 ![All containers are running](media/docker-dektop-running.png)
 
 It might take a couple of seconds for Elasticsearch to start up.
-Then you can navigate to [[localhost](http://localhost)](http://localhost/) in your browser to access the amcat client.
+Then you can navigate to <http://localhost/> in your browser to access the amcat client.
 
 ![First view of the amcat react app in your browser](media/amcat-1.png)
 
@@ -152,14 +152,14 @@ To access your newly created amcat suite, you will first need to create an admin
 #### Command Line
 
 ```bash
-docker exec -it amcat4 amcat4 add-admin admin
-docker exec -it amcat4 amcat4 create-env -a admin -p supergeheim
+docker exec -t amcat4 amcat4 add-admin your-email@example.com
+docker exec -t amcat4 amcat4 create-env -a admin -p supergeheim
 ```
 
 #### R
 
 ```r
-dockr::docker_exec(id = "amcat4", "amcat4 add-admin admin")
+dockr::docker_exec(id = "amcat4", "amcat4 add-admin your-email@example.com")
 dockr::docker_exec(id = "amcat4", "amcat4 create-env -a admin -p supergeheim")
 ```
 
@@ -178,7 +178,7 @@ You can also create an example data collection (which are called index in Elasti
 #### Command Line
 
 ```bash
-docker exec -it amcat4 amcat4 create-test-index
+docker exec -t amcat4 amcat4 create-test-index
 ```
 
 #### R
@@ -194,6 +194,10 @@ docker_exec(id = "amcat4", "amcat4 create-test-index")
 ```
 
 :::
+
+You can now use Middlecat to authenticate as the admin user:
+
+![After logging into the amcat react app in your browser](media/amcat-2-middlecat.png)
 
 Now you can access this index using the user name and password above and `http://localhost/api` as the host:
 
