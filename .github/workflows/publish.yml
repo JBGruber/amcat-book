@@ -44,7 +44,6 @@ jobs:
           reticulate::virtualenv_create("r-reticulate", Sys.which("python"))
           
       - name: Render Quarto Project
-        description: "adapted version from https://github.com/quarto-dev/quarto-actions/blob/main/render/action.yml"
         env:
           QUARTO_PRINT_STACK: true
         shell: bash
