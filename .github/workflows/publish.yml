@@ -48,18 +48,17 @@ jobs:
           QUARTO_PRINT_STACK: true
         shell: bash
         run: |
-          mkdir -p ./site/book
-          quarto render . --output-dir ./site/book
+          mkdir -p ./_book/book
+          quarto render . --output-dir ./_book/book
           quarto render home.qmd -o index.html
-          mv index.html ./site/index.html
-          mv home_files ./site/home_files
-          echo "QUARTO_OUTPUT=./site/book" >> $GITHUB_ENV
+          mv index.html ./_book/index.html
+          mv home_files ./_book/home_files
+          echo "QUARTO_OUTPUT=./_book/book" >> $GITHUB_ENV
           
       - name: Publish
         uses: quarto-dev/quarto-actions/publish@v2
         with:
           render: false
-          path: site
           target: netlify
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
           
