@@ -43,9 +43,27 @@ jobs:
           install.packages('reticulate')
           reticulate::virtualenv_create("r-reticulate", Sys.which("python"))
           
-      - name: Render and Publish
+      - name: Render Quarto Project
+        description: "adapted version from https://github.com/quarto-dev/quarto-actions/blob/main/render/action.yml"
+        runs:
+          using: 'composite'
+          steps: 
+            - name: 'Render'
+              env:
+                QUARTO_PRINT_STACK: true
+              run: |
+                mkdir -p ./site/book
+                quarto render . --output-dir ./site/book
+                quarto render home.qmd -o index.html
+                mv index.html ./site/index.html
+                mv home_files ./site/home_files
+                echo "QUARTO_OUTPUT=./site/book" >> $GITHUB_ENV
+              shell: bash
+          
+      - name: Publish
         uses: quarto-dev/quarto-actions/publish@v2
         with:
+          render: false
           target: netlify
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
           

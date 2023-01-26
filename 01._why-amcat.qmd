@@ -24,7 +24,7 @@ It consists of several different software packages, which are usually used toget
 
 -   [`amcat4`](https://github.com/ccs-amsterdam/amcat4) takes care of **document storage**, provides fine-grained **data access control** (e.g., to restrict access to the parts of a dataset which are copyrighted, proprietary or (privacy-)sensitive) and supports fast queries using [Elasticsearch](https://www.elastic.co/what-is/elasticsearch)
 -   [`middlecat`](https://github.com/ccs-amsterdam/middlecat) provides **authentication methods** to support the fine-grained **data access control** built into `amcat4` (e.g., to make datasets available for which data owners have restricted full text access)
--   [`nextcat`](https://github.com/ccs-amsterdam/nextcat) offers a user interface, which makes it easy to **query documents from `amcat4` via a web interface**, share data with collaborators or the public and present your corpora to stakeholders, the community or the public
+-   [`amcat4client`](https://github.com/ccs-amsterdam/amcat4client) offers a user interface, which makes it easy to **query documents from `amcat4` via a web interface**, share data with collaborators or the public and present your corpora to stakeholders, the community or the public
 -   [`amcat4apiclient`](https://github.com/ccs-amsterdam/amcat4apiclient) provides bindings to **manage and query corpora from the `Python` programming language** via `amcat4`'s REST API
 -   [`amcat4r`](https://github.com/ccs-amsterdam/amcat4r) provides bindings to **manage and query corpora from the `R` programming language** via `amcat4`'s REST API
 
