@@ -69,10 +69,9 @@ knitr::asis_output(paste0(
 Setting the containers up from `R` or `Python` uses the same settings.
 You can leave most lines as they are, but we want to draw your attention to a couple of settings you might want to change:
 
-- In lines `r grep("restart:", docker_compose)`, we have commented out `restart: unless-stopped`. This is for testing purposes. You should remove the `# ` to activate the setting, once the containers are working properly (i.e., not crashing) so amcat will restart after rebooting your system or crashing.
 - In lines `r grep("ports:", docker_compose):(grep("ports:", docker_compose) + 1)`, we set the port to `80` on the host machine. This means you will be able to access the amcat client without specifying a port. If the port is already in use, the conainter will crash. In this case, change `80`to a different port and access amcat through, for example, `localhost:5000`.
 - In lines `r grep("discovery.type", docker_compose):(grep("ES_JAVA_OPTS", docker_compose))`, we configured Elasticsearch to form a single-node cluster and use a maximum of 4GB memory.
-- In lines `r grep("volumes:", docker_compose):(grep("volumes:", docker_compose) + 1)` we suggested a setting so Elasticsearch will store your data on a volume on the host machine. We recommend this to make it easier to back up your database and reuse it with a different installation of Elasticsearch (e.g., after an update) in the future. However, the container will not run if it does not have proper access to this folder. See the comment to solve this.
+- In lines `r grep("volumes:", docker_compose):(grep("volumes:", docker_compose) + 1)` we suggested a setting so Elasticsearch will store your data on a volume on the host machine. We recommend this to make it easier to back up your database and reuse it with a different installation of Elasticsearch (e.g., after an update) in the future. However, the container will not run if it does not have proper access to this folder. See the comment to solve this. Note that the suggested local path is just an example.
 :::
 
 To download and start the amcat containers (Elasticsearch, amcat4, and amcat4client) use one of the approaches below:
@@ -142,25 +141,28 @@ Then you can navigate to <http://localhost/> in your browser to access the amcat
 
 ![First view of the amcat react app in your browser](media/amcat-1.png)
 
-::: {.callout-important}
-# Will change soon
-
-To access your newly created amcat suite, you will first need to create an admin user (note, the second `amcat4` is not a typo, but the command, while the first one is the name of the container):
-
+Before you access your newly created amcat suite, you should first check the settings and change to your needs.
+You can do this with `amcat4 config`:
 
 ::: {.panel-tabset}
 #### Command Line
 
 ```bash
-docker exec -t amcat4 amcat4 add-admin your-email@example.com
-docker exec -t amcat4 amcat4 create-env -a admin -p supergeheim
+docker exec -it amcat4 amcat4 config
+```
+
+![Configuring amcat4](media/config.png)
+
+If you choose anything but `no_auth` for authentification options, you should also add a global admin user via:
+
+```bash
+docker exec -t amcat4 amcat4 add-admin admin@example.com
 ```
 
 #### R
 
 ```r
-dockr::docker_exec(id = "amcat4", "amcat4 add-admin your-email@example.com")
-dockr::docker_exec(id = "amcat4", "amcat4 create-env -a admin -p supergeheim")
+# coming soon
 ```
 
 #### Python
@@ -168,8 +170,6 @@ dockr::docker_exec(id = "amcat4", "amcat4 create-env -a admin -p supergeheim")
 ```python
 # coming soon
 ```
-
-:::
 :::
 
 You can also create an example data collection (which are called index in Elasticsearch):
@@ -305,16 +305,11 @@ env/bin/python -m amcat4 run
 #> [INFO   :uvicorn.error  ] Uvicorn running on http://0.0.0.0:5000 (Press CTRL+C to quit)
 ```
 
-
-::: {.callout-important}
-# Will change soon
-
-To create an admin user for testing, use:
+To check and adapt the settings of amcat use:
 
 ```bash
-env/bin/python -m amcat4 create-admin
+env/bin/python -m amcat4 config
 ```
-:::
 
 Since you probably don't want to run amcat in an open ssh tab all the time, you should set it up as a service, for example with `systemd`.
 So head over to `/etc/systemd/system` and create a new file, for example, `amcat.service`.
