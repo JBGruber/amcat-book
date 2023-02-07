@@ -5,14 +5,6 @@ execute:
 bibliography: references.bib
 ---
 
-```{r cleanstart, include=FALSE}
-amcat4r::run_amcat_docker(force_install = 1)
-Sys.sleep(30)
-dockr::docker_exec(id = "amcat4", "amcat4 add-admin admin")
-dockr::docker_exec(id = "amcat4", "amcat4 create-env -a admin -p supergeheim")
-dockr::docker_exec(id = "amcat4", "amcat4 create-test-index")
-```
-
 
 ::: {.callout-note}
 You need at least the modules in the Data Layer and one Frontend Client to work with document storage:
@@ -47,49 +39,36 @@ Replace this with the address to the `amcat4` instance you are working with (e.g
 
 We first need to log in:
 
-::: {.panel-tabset}
 
+::: {.panel-tabset}
 #### R
 
-```{r, eval=FALSE}
+```{r}
+#| message: false
 library(amcat4r)
-amcat_auth("http://localhost/amcat", username = "admin", password = "supergeheim")
+amcat_login("http://localhost/amcat")
 ```
-
-```{r, echo=FALSE, message=FALSE}
-library(amcat4r)
-amcat_auth("http://localhost/amcat", username = "admin", password = "supergeheim", force_refresh = TRUE, cache = 1L)
-```
-
-If you are using RStudio, you can omit the `password` argument and enter it instead through the RStudio password dialogue.
 
 #### Python
 
-```{python, eval=FALSE}
-from amcat4apiclient.amcat4apiclient import AmcatClient
-amcat = AmcatClient("http://localhost/amcat", username="admin", password="supergeheim")
+```{python}
+#| message: false
+from amcat4py import AmcatClient
+amcat = AmcatClient("http://localhost/amcat")
 ```
-
-```{python, echo=FALSE, message=FALSE}
-from amcat4apiclient.amcat4apiclient import AmcatClient
-amcat = AmcatClient("http://localhost/amcat", username="admin", password="supergeheim", force_refresh=True)
-```
-
 
 #### cURL
 
-We extract the token from the retrieved JSON using the [jq package](https://stedolan.github.io/jq/), which we will later also use for printing.
-This assumes you are using the terminal on a Unix-like system.
+There is no dedicated way at the moment to get a token via cURL.
+You can still use cURL with instances that do not require authentication or by copying the token from `Python` or `R`.
+In these cases, you can make requests with an extra header, for example:
 
-```{bash}
-AMCAT_TOKEN=$(curl -s -d "username=admin&password=supergeheim" -X POST http://localhost/amcat/auth/token | jq -r ".access_token")
+```{bash, eval=FALSE}
+AMCAT_TOKEN="YOUR_TOKEN"
+curl -s http://localhost/amcat/index/ \
+  -H "Authorization: Bearer ${AMCAT_TOKEN}"
 ```
 
-```{r echo=FALSE}
-# the above is not actually saved bc knitr invokes a new bash session next time
-Sys.setenv(AMCAT_TOKEN = system('curl -s -d "username=admin&password=supergeheim" -X POST http://localhost/amcat/auth/token | jq -r ".access_token"', 
-                                intern = TRUE))
-```
 :::
 
 We can first list all available indexes, as a document collection is called in Elasticsearch and thus in amcat:
@@ -110,8 +89,7 @@ amcat.list_indices()
 #### cURL
 
 ```{bash}
-curl -s http://localhost/amcat/index/ \
-  -H "Authorization: Bearer ${AMCAT_TOKEN}"
+curl -s http://localhost/amcat/index/
 ```
 :::
 
@@ -137,8 +115,7 @@ amcat.list_index_users(index="state_of_the_union")
 #### cURL
 
 ```{bash}
-curl -s http://localhost/amcat/index/state_of_the_union/users \
-  -H "Authorization: Bearer ${AMCAT_TOKEN}"
+curl -s http://localhost/amcat/index/state_of_the_union/users
 ```
 :::
 
@@ -164,11 +141,10 @@ for k, v in sotu[1].items():
 
 #### cURL
 
-To not clog the output, we save it into file and diplay only the beginning:
+To not clog the output, we save it into file and display only the beginning:
 
 ```{bash}
-curl -s http://localhost/amcat/index/state_of_the_union/documents \
-  -H "Authorization: Bearer ${AMCAT_TOKEN}" > sotu.json
+curl -s http://localhost/amcat/index/state_of_the_union/documents > sotu.json
 # show the first few characters only
 head -c 150 sotu.json
 ```
@@ -223,7 +199,6 @@ amcat.upload_documents("state_of_the_union", [new_doc])
 ```{bash}
 #| eval: false
 curl -s -X POST http://localhost/amcat/index/state_of_the_union/documents \
-  -H "Authorization: Bearer ${AMCAT_TOKEN}" \
   -H "Content-Type: application/json" \
   -d '{
          "documents":[
@@ -263,7 +238,6 @@ pp.pprint(res)
 
 ```{bash}
 curl -s -X POST http://localhost/amcat/index/state_of_the_union/query \
-  -H "Authorization: Bearer ${AMCAT_TOKEN}" \
   -H 'Content-Type: application/json' \
   -d '{"filters":{"title":["test"]}}' | jq -r ".results"
 ```
@@ -292,8 +266,7 @@ amcat.get_fields("state_of_the_union")
 #### cURL
 
 ```{bash}
-curl -s http://localhost/amcat/index/state_of_the_union/fields \
-  -H "Authorization: Bearer ${AMCAT_TOKEN}"
+curl -s http://localhost/amcat/index/state_of_the_union/fields
 ```
 :::
 
@@ -323,7 +296,6 @@ amcat.set_fields("state_of_the_union", {"keyword":"keyword"})
 ```{bash}
 #| eval: false
 curl -s -X POST http://localhost/amcat/index/state_of_the_union/fields \
-  -H "Authorization: Bearer ${AMCAT_TOKEN}" \
   -H 'Content-Type: application/json' \
   -d '{"keyword":"keyword"}'
 ```
@@ -334,6 +306,7 @@ When you now query a document, however, you will not see this new field:
 ::: {.panel-tabset}
 
 #### R
+
 ```{r}
 query_documents(index = "state_of_the_union", fields = NULL, filters = list(title = "test"))
 ```
@@ -341,7 +314,7 @@ query_documents(index = "state_of_the_union", fields = NULL, filters = list(titl
 #### Python
 
 ```{python}
-res=list(amcat.query("state_of_the_union", fields=None, filters={"title": "test"}))
+res = list(amcat.query("state_of_the_union", fields=None, filters={"title": "test"}))
 pp.pprint(res)
 ```
 
@@ -349,7 +322,6 @@ pp.pprint(res)
 
 ```{bash}
 curl -s -X POST http://localhost/amcat/index/state_of_the_union/query \
-  -H "Authorization: Bearer ${AMCAT_TOKEN}" \
   -H 'Content-Type: application/json' \
   -d '{"filters":{"title":["test"]}}' | jq -r ".results"
 ```
@@ -389,7 +361,7 @@ amcat.update_document("state_of_the_union", doc_id=test_doc["_id"], body={"keywo
 ```
 
 ```{python}
-res=list(amcat.query("state_of_the_union", fields=None, filters={"title": "test"}))
+res=list(amcat.query("state_of_the_union", fields=["title", "keyword"], filters={"title": "test"}))
 pp.pprint(res)
 ```
 
@@ -398,11 +370,9 @@ pp.pprint(res)
 ```{bash}
 #| eval: false
 test_doc=$(curl -s -X POST http://localhost/amcat/index/state_of_the_union/query \
-  -H "Authorization: Bearer ${AMCAT_TOKEN}" \
   -H 'Content-Type: application/json' \
   -d '{"filters":{"title":["test"]}}' | jq -r ".results[]._id")
 curl -s -X PUT http://localhost/amcat/index/state_of_the_union/documents/${test_doc} \
-  -H "Authorization: Bearer ${AMCAT_TOKEN}" \
   -H 'Content-Type: application/json' \
   -d '{"keyword": "test"}'
 ```
@@ -410,7 +380,6 @@ curl -s -X PUT http://localhost/amcat/index/state_of_the_union/documents/${test_
 
 ```{bash}
 curl -s -X POST http://localhost/amcat/index/state_of_the_union/query \
-  -H "Authorization: Bearer ${AMCAT_TOKEN}" \
   -H 'Content-Type: application/json' \
   -d '{"filters":{"title":["test"]}}' | jq -r ".results"
 ```
@@ -445,7 +414,6 @@ amcat.get_fields("new_index")
 ```{bash}
 #| eval: false
 curl -s -X POST http://localhost/amcat/index/ \
-  -H "Authorization: Bearer ${AMCAT_TOKEN}" \
   -H 'Content-Type: application/json' \
   -d '{
         "name": "new_index",
@@ -454,10 +422,8 @@ curl -s -X POST http://localhost/amcat/index/ \
 ```
 
 ```{bash}
-curl -s http://localhost/amcat/index/ \
-  -H "Authorization: Bearer ${AMCAT_TOKEN}"
-curl -s http://localhost/amcat/index/new_index/fields \
-  -H "Authorization: Bearer ${AMCAT_TOKEN}"
+curl -s http://localhost/amcat/index/
+curl -s http://localhost/amcat/index/new_index/fields
 ```
 
 :::
@@ -513,7 +479,6 @@ amcat.get_fields("new_index")
 ```{bash}
 #| eval: false
 curl -s -X POST http://localhost/amcat/index/new_index/documents \
-  -H "Authorization: Bearer ${AMCAT_TOKEN}" \
   -H "Content-Type: application/json" \
   -d '{
          "documents":[
@@ -531,8 +496,7 @@ curl -s -X POST http://localhost/amcat/index/new_index/documents \
 ```
 
 ```{bash}
-curl -s http://localhost/amcat/index/new_index/fields \
-  -H "Authorization: Bearer ${AMCAT_TOKEN}"
+curl -s http://localhost/amcat/index/new_index/fields
 ```
 
 :::
@@ -561,8 +525,7 @@ amcat.delete_index("new_index")
 
 ```{bash}
 #| eval: false
-curl -s -X DELETE http://localhost/amcat/index/new_index \
-  -H "Authorization: Bearer ${AMCAT_TOKEN}"
+curl -s -X DELETE http://localhost/amcat/index/new_index
 ```
 :::
 
@@ -594,7 +557,6 @@ pp.pprint(res)
 
 ```{bash}
 curl -s -X POST http://localhost/amcat/index/state_of_the_union/query \
-  -H "Authorization: Bearer ${AMCAT_TOKEN}" \
   -H 'Content-Type: application/json' \
   -d '{"filters":{"title":["test"]}}' | jq -r ".results"
 ```
@@ -658,7 +620,6 @@ pp.pprint(res)
 ```{bash}
 #| eval: false
 curl -s -X POST http://localhost/amcat/index/state_of_the_union/documents \
-  -H "Authorization: Bearer ${AMCAT_TOKEN}" \
   -H "Content-Type: application/json" \
   -d '{
         "documents":[
@@ -678,7 +639,6 @@ curl -s -X POST http://localhost/amcat/index/state_of_the_union/documents \
 
 ```{bash}
 curl -s -X POST http://localhost/amcat/index/state_of_the_union/query \
-  -H "Authorization: Bearer ${AMCAT_TOKEN}" \
   -H 'Content-Type: application/json' \
   -d '{"filters":{"title":["test"]}}' | jq -r ".results"
 ```
@@ -736,7 +696,6 @@ pp.pprint(res)
 ```{bash}
 #| eval: false
 curl -s -X POST http://localhost/amcat/index/state_of_the_union/documents \
-  -H "Authorization: Bearer ${AMCAT_TOKEN}" \
   -H "Content-Type: application/json" \
   -d '{
         "documents":[
@@ -754,13 +713,12 @@ curl -s -X POST http://localhost/amcat/index/state_of_the_union/documents \
 
 ```{bash}
 curl -s -X POST http://localhost/amcat/index/state_of_the_union/query \
-  -H "Authorization: Bearer ${AMCAT_TOKEN}" \
   -H 'Content-Type: application/json' \
   -d '{"filters":{"title":["test"]}}' | jq -r ".results"
 ```
 :::
 
 The document with the ID 1 has been replaced with the new data.
-This is the normal behavior of amcat: when we tell it to add data to an already present document, identified by the ID, it will be replaced.
+This is the normal behaviour of amcat: when we tell it to add data to an already present document, identified by the ID, it will be replaced.
 If a field was present in the old document, but not in the data it is replaced with, this field will be empty afterwards.
 

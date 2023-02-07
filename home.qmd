@@ -21,16 +21,4 @@ The AmCAT designers have tried to make it easy to add functionality, such as upl
 
 You can check out the free [**book/manual**](./book/index.html), which shows you how to set up your own AmCAT instance and walks you through conducting your own analyses using AmCAT.
 
-# Status of the open amcat.nl and amcat.vu.nl servers
 
-Previously amcat.nl allowed any user to create an account and upload articles.
-Unfortunately, because this server was running an older version of the software there was a data breach.
-As a result, this server is discontinued.
-
-If you had an account at amcat.nl, you can download your data at recovery.amcat.nl.
-If you are working at the VU or the broader ccs.amsterdam research group, you can request an account at vu.amcat.nl.
-
-For the future, together with UvA and as part of our OPTED project we are working on a new version of AmCAT that is much easier to install yourself.
-We will also setup an open AmCAT server again as soon as we are sure that this can be done safely and securely.
-
-Thanks for your understanding!

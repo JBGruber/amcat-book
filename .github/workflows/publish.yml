@@ -41,7 +41,11 @@ jobs:
         shell: Rscript {0}
         run: |
           install.packages('reticulate')
-          reticulate::virtualenv_create("r-reticulate", Sys.which("python"))
+          
+      - name: spin up amcat
+        shell: bash
+        run: |
+          make download-compose-bin compose-file spin-up wait config
           
       - name: Render Quarto Project
         env:
