@@ -4,7 +4,7 @@ OS2 := $(shell uname -m)
 
 all: download-compose-bin compose-file spin-up wait config render-book clean
 
-download-compose:
+download-compose-bin:
 	echo ${OS2}
 	curl -SL https://github.com/docker/compose/releases/download/${COMPOSEVERSION}/docker-compose-${OS}-${OS2} -o docker-compose2
 	chmod +x docker-compose2
@@ -14,7 +14,6 @@ compose-file:
 	sed -i 's/container_name: /container_name: render-/g' docker-compose-render.yml
 	sed -i 's/elastic7:9200/render-elastic7:9200/g' docker-compose-render.yml
 	sed -i 's|http://amcat|http://render-amcat|g' docker-compose-render.yml
-	sed -i 's|80:80|8000:80|g' docker-compose-render.yml
 
 spin-up:
 	./docker-compose2 -f docker-compose-render.yml up -d --pull="missing" --quiet-pull
@@ -29,4 +28,4 @@ render-book:
 	quarto render
 	
 clean:
-	rm docker-compose.yml docker-compose2
+	rm docker-compose-render.yml docker-compose2
