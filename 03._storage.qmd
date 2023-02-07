@@ -44,9 +44,16 @@ We first need to log in:
 #### R
 
 ```{r}
-#| message: false
+#| eval: false
 library(amcat4r)
 amcat_login("http://localhost/amcat")
+```
+
+```{r}
+#| echo: false
+#| message: false
+library(amcat4r)
+amcat_login("http://localhost/amcat", cache = 2L)
 ```
 
 #### Python

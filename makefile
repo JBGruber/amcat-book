@@ -19,7 +19,7 @@ spin-up:
 	./docker-compose2 -f docker-compose-render.yml up -d --pull="missing" --quiet-pull
 
 wait:
-	sleep 30 # wait for container to spin-up
+	sleep 60 # wait for container to spin-up
 
 config:
 	docker exec -t render-amcat4 amcat4 create-test-index
