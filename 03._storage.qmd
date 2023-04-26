@@ -53,7 +53,7 @@ amcat_login("http://localhost/amcat")
 #| echo: false
 #| message: false
 library(amcat4r)
-amcat_login("http://localhost/amcat", cache = 2L)
+amcat_login("http://localhost/amcat", cache = 2L, force_refresh = T)
 ```
 
 #### Python
@@ -62,7 +62,10 @@ amcat_login("http://localhost/amcat", cache = 2L)
 #| message: false
 from amcat4py import AmcatClient
 amcat = AmcatClient("http://localhost/amcat")
+if amcat.login_required():
+    amcat.login()
 ```
+
 
 #### cURL
 

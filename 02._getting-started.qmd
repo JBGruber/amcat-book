@@ -42,7 +42,7 @@ A side effect is that we can easily develop amcat for all operating systems at o
 :::
 
 If you have never used Docker before, the first step is to install the infrastructure on your system.
-Head over to the Docker website to get [Docker Desktop](https://docs.docker.com/get-docker/) or the [Docker Engine](https://docs.docker.com/engine/install/) and [Docker Compose](https://docs.docker.com/compose/install/) to use Docker from the command line.
+Head over to the Docker website to get [Docker Desktop](https://docs.docker.com/get-docker/) or the [Docker Engine](https://docs.docker.com/engine/install/) and [Docker Compose](https://docs.docker.com/compose/install/) to use Docker from the command line.^[On Ubuntu and Debian, the Docker Compose version in the repos is too old. You can use this gist to update it: <https://gist.github.com/JBGruber/db4de49ee106889b969a277f800c05b8>]
 We do not really need Docker Desktop, but it comes with both the Docker Engine and Docker Compose, which makes installation easier if you do not use a package manager (which many Windows and MacOS users do not).
 
 To install the amcat data layer, you should use our Docker Compose file.
@@ -210,10 +210,10 @@ Now you can access the test index at `http://localhost/`:
 ### Setup on your own server
 
 If you decide not to go with Docker, for example, because you feel you need more control over what is happening, you can also run amcat on your system directly.
-We do not recommend this anymore and have, in fact, switched our own servers over to use the docker image.
+We do not recommend this anymore and have, in fact, switched our own servers over to use the Docker images.
 If there is something wrong with the images or you simply want to customise the setup, we suggest you head over to the [GitHub repo](https://github.com/ccs-amsterdam/amcat4docker) and change the files as you like.
 
-If you still want to go without docker, feel free to use the example configuration below.
+If you still want to go without Docker, feel free to use the example configuration below.
 We assume that if you are going this route, you are running a Linux server.
 Below we show one example setup.
 Obviously feel free to replace the suggested Linux tools like *systemd* or *nginx* with your own choice.
@@ -286,7 +286,7 @@ curl -X GET 'http://localhost:9200'
 ```
 
 Next, you want to setup the amcat server.
-You can do this wherever you like, but will will set things up at `/srv/amcat`:
+You can do this wherever you like, but we will set things up at `/srv/amcat`:
 
 ```bash
 sudo git clone https://github.com/ccs-amsterdam/amcat4 /srv/amcat
@@ -319,7 +319,7 @@ To check and adapt the settings of amcat use:
 env/bin/python -m amcat4 config
 ```
 
-Since you probably don't want to run amcat in an open ssh tab all the time, you should set it up as a service, for example with `systemd`.
+Since you probably don't want to run amcat in an open ssh tab all the time, you should set it up as a service, for example, with `systemd`.
 So head over to `/etc/systemd/system` and create a new file, for example, `amcat.service`.
 
 Here is a small example to set things up:
@@ -396,7 +396,7 @@ If something went wrong, you can troubleshoot with `sudo journalctl -eu amcat.se
 ### amcat4client
 
 ::: {.callout-note}
-If you are using amcat on our servers or through docker, you can skip this section and move on to install an API client to start managing amcat from either the [R](#amcat4r) or [Python](#amcat4py) .
+If you are using amcat on our servers or through Docker, you can skip this section and move on to install an API client to start managing amcat from either the [R](#amcat4r) or [Python](#amcat4py).
 :::
 
 If you have checked port 5000 of your new amcat server while testing it above (i.e., `http://0.0.0.0:5000`), you were probably disappointed by a simple `{"detail":"Not Found"}` message.
