@@ -1,4 +1,5 @@
 Version: 1.0
+ProjectId: 113a2b88-581c-4626-abcb-f6e8b58f6b4e
 
 RestoreWorkspace: No
 SaveWorkspace: No
@@ -11,3 +12,5 @@ Encoding: UTF-8
 
 RnwWeave: Sweave
 LaTeX: pdfLaTeX
+
+BuildType: Makefile

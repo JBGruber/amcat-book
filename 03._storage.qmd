@@ -6,33 +6,87 @@ bibliography: references.bib
 ---
 
 
-::: {.callout-note}
-You need at least the modules in the Data Layer and one Frontend Client to work with document storage:
-
-![amcat instance after following this chapter](media/amcat-flow-getting-started.drawio.png)
-
-:::
-
-This chapter covers how you can upload, change, query and delete documents and indexes on the amcat server.
-Only a few tasks are implemented in the [Web user interface](#manage-documents-with-a-client), which means you will need to use [one of the clients](#manage-documents-with-a-client) in `R` or `Python` or another means to call the API (e.g., through [cURL](https://en.wikipedia.org/wiki/CURL) as shown below).
+This chapter covers how you can upload, change, query, and delete documents and indexes in AmCAT.
+Some basic tasks are implemented in the [Web user interface](#manage-documents-with-a-client), for the rest you need to use [one of the clients](#manage-documents-with-a-client) in `R` or `Python` or another means to call the API (e.g., through [cURL](https://en.wikipedia.org/wiki/CURL) as shown below).
 You can also use the API calls to build your own client.
+
 More information on the API can be found on every amcat4 instance at `/redoc` (e.g., <http://localhost/amcat/redoc>).
+
 Let us know about it and we will promote your new API wrapper package here.
 
-## Manage Documents With the Web Interface
+## Manage Documents with the Graphic User Interface
 
-::: {.callout-important}
-# Coming soon...
-:::
 
-::: {.callout-important}
-# Will change soon
+### Upload 
 
-Currently, there is no way to upload, change, or delete documents and indexes through the web interface.
-Rather, you can add new datasets through [calls to the amcat API](#manage-documents-with-a-client).
-:::
+From the Graphic User Interface (GUI), you can “Create an Index” by uploading it as a csv file. 
 
-## Manage Documents With a Client
+Navigate to your favorite spreadsheet (e.g. Excel) and create something that resembles the following:
+
+![](media/amcat-3.1-1.png)
+
+Save it as csv utf-8:
+
+![](media/amcat-3.1-2.png)
+
+Upload it to AmCAT:
+
+![](media/amcat-3.1-3.png)
+
+Fill out each option and press “Create”:
+
+![](media/amcat-3.1-4.png)
+
+That will display a window with the following information:
+
+![](media/amcat-3.1-5.png)
+
+Now, you can just drag and drop the csv file into the window:
+
+![](media/amcat-3.1-6.png)
+
+This will display a window with the following information:
+
+![](media/amcat-3.1-7.png)
+
+From there, you can either choose the type of field by clicking “Select field” or let AmCAT do it for you by clicking “automate”. If in doubt, then choose “automate”. Clicking “automate” on all gives the following result:
+
+![](media/amcat-3.1-8.png)
+
+You have to explicitly choose the column(s) that will be used to create the unique identifier. In this example, I explicitly created a column named “id”. So, that is the one I chose as identifier:
+
+![](media/amcat-3.1-9.png)
+
+Now, you can press “Upload 15 documents”, which is the number of rows in the csv file. 
+
+![](media/amcat-3.1-10.png)
+
+Now you can navigate to your indeces and find your newly made index:
+
+![](media/amcat-3.1-11.png)
+
+### Visualize 
+
+One of AmCAT features is that it allows you to perform some basic visualizations. To do so in the main window, you first need to enable them. 
+
+For this, you just need to click on “Enable visualizations in field settings”.
+
+![](media/amcat-3.2-1.png)
+
+That will open the following window: 
+
+![](media/amcat-3.2-2.png)
+
+From there, you just need to click on the fields ![](media/amcat-3.2-3.png), under the column “Display”, and choose the options “show as heading” and/or “visualize in list”.
+
+![](media/amcat-3.2-4.png)
+
+You can go back to the main window by clicking on "Dashboard" ![](media/amcat-3.2-5.png). There you can see the visualizations you have enabled:
+
+![](media/amcat-3.2-6.png)
+
+
+## Manage Documents with the API
 
 For this overview, we log into a local `amcat4` (i.e., `http://localhost/amcat`).
 Replace this with the address to the `amcat4` instance you are working with (e.g., `https://opted.amcat.nl/api`).
@@ -51,6 +105,7 @@ amcat_login("http://localhost/amcat")
 
 ```{r}
 #| echo: false
+#| eval: false
 #| message: false
 library(amcat4r)
 amcat_login("http://localhost/amcat", cache = 2L, force_refresh = T)
@@ -59,6 +114,7 @@ amcat_login("http://localhost/amcat", cache = 2L, force_refresh = T)
 #### Python
 
 ```{python}
+#| eval: false
 #| message: false
 from amcat4py import AmcatClient
 amcat = AmcatClient("http://localhost/amcat")
@@ -81,24 +137,26 @@ curl -s http://localhost/amcat/index/ \
 
 :::
 
-We can first list all available indexes, as a document collection is called in Elasticsearch and thus in amcat:
+We can first list all available indexes, as a document collection is called in Elasticsearch and thus in AmCAT:
 
 ::: {.panel-tabset}
 
 #### R
 ```{r}
+#| eval: false
 list_indexes()
 ```
 
 #### Python
 
 ```{python}
+#| eval: false
 amcat.list_indices()
 ```
 
 #### cURL
 
-```{bash}
+```{bash, eval=FALSE}
 curl -s http://localhost/amcat/index/
 ```
 :::
@@ -113,18 +171,20 @@ To see everyone who has been granted access to an index we can use:
 #### R
 
 ```{r}
+#| eval: false
 list_index_users(index = "state_of_the_union")
 ```
 
 #### Python
 
 ```{python}
+#| eval: false
 amcat.list_index_users(index="state_of_the_union")
 ```
 
 #### cURL
 
-```{bash}
+```{bash, eval=FALSE}
 curl -s http://localhost/amcat/index/state_of_the_union/users
 ```
 :::
@@ -136,6 +196,7 @@ To see what an index looks like, we can query it leaving all fields blank to req
 
 #### R
 ```{r}
+#| eval: false
 sotu <- query_documents(index = "state_of_the_union", queries = NULL, fields = NULL)
 str(sotu)
 ```
@@ -143,6 +204,7 @@ str(sotu)
 #### Python
 
 ```{python}
+#| eval: false
 sotu = list(amcat.query("state_of_the_union", fields=None))
 print(len(sotu))
 for k, v in sotu[1].items():
@@ -153,13 +215,13 @@ for k, v in sotu[1].items():
 
 To not clog the output, we save it into file and display only the beginning:
 
-```{bash}
+```{bash, eval=FALSE}
 curl -s http://localhost/amcat/index/state_of_the_union/documents > sotu.json
 # show the first few characters only
 head -c 150 sotu.json
 ```
 
-```{r include=FALSE}
+```{r include=FALSE, eval=FALSE}
 unlink("sotu.json")
 ```
 
@@ -171,6 +233,7 @@ Knowing now what a document should look like in this index, we can upload a new 
 
 #### R
 ```{r}
+#| eval: false
 new_doc <- data.frame(
   title = "test",
   text = "test",
@@ -181,10 +244,6 @@ new_doc <- data.frame(
   url = "test"
 )
 upload_documents(index = "state_of_the_union", new_doc)
-```
-
-```{r include=FALSE}
-Sys.sleep(5)
 ```
 
 #### Python
@@ -206,8 +265,7 @@ amcat.upload_documents("state_of_the_union", [new_doc])
 
 #### cURL
 
-```{bash}
-#| eval: false
+```{bash, eval=FALSE}
 curl -s -X POST http://localhost/amcat/index/state_of_the_union/documents \
   -H "Content-Type: application/json" \
   -d '{
@@ -232,12 +290,14 @@ Let's see if the the new document is in the index:
 
 #### R
 ```{r}
+#| eval: false
 query_documents(index = "state_of_the_union", fields = NULL, filters = list(title = "test"))
 ```
 
 #### Python
 
 ```{python}
+#| eval: false
 import pprint
 pp = pprint.PrettyPrinter(depth=4)
 res=list(amcat.query("state_of_the_union", fields=None, filters={"title": "test"}))
@@ -246,7 +306,7 @@ pp.pprint(res)
 
 #### cURL
 
-```{bash}
+```{bash, eval=FALSE}
 curl -s -X POST http://localhost/amcat/index/state_of_the_union/query \
   -H 'Content-Type: application/json' \
   -d '{"filters":{"title":["test"]}}' | jq -r ".results"
@@ -264,18 +324,20 @@ To learn more about the fields in the test index, you can use:
 
 #### R
 ```{r}
+#| eval: false
 get_fields(index = "state_of_the_union")
 ```
 
 #### Python
 
 ```{python}
+#| eval: false
 amcat.get_fields("state_of_the_union")
 ```
 
 #### cURL
 
-```{bash}
+```{bash, eval=FALSE}
 curl -s http://localhost/amcat/index/state_of_the_union/fields
 ```
 :::
@@ -291,6 +353,7 @@ You can add new fields to this, for example, if you want to add a keyword to the
 
 #### R
 ```{r}
+#| eval: false
 set_fields(index = "state_of_the_union", list(keyword = "keyword"))
 ```
 
@@ -303,8 +366,7 @@ amcat.set_fields("state_of_the_union", {"keyword":"keyword"})
 
 #### cURL
 
-```{bash}
-#| eval: false
+```{bash, eval=FALSE}
 curl -s -X POST http://localhost/amcat/index/state_of_the_union/fields \
   -H 'Content-Type: application/json' \
   -d '{"keyword":"keyword"}'
@@ -318,19 +380,21 @@ When you now query a document, however, you will not see this new field:
 #### R
 
 ```{r}
+#| eval: false
 query_documents(index = "state_of_the_union", fields = NULL, filters = list(title = "test"))
 ```
 
 #### Python
 
 ```{python}
+#| eval: false
 res = list(amcat.query("state_of_the_union", fields=None, filters={"title": "test"}))
 pp.pprint(res)
 ```
 
 #### cURL
 
-```{bash}
+```{bash, eval=FALSE}
 curl -s -X POST http://localhost/amcat/index/state_of_the_union/query \
   -H 'Content-Type: application/json' \
   -d '{"filters":{"title":["test"]}}' | jq -r ".results"
@@ -345,6 +409,7 @@ We can add something to the new field and see if it shows up:
 #### R
 
 ```{r}
+#| eval: false
 update_tags(index = "state_of_the_union", 
             action = "add", 
             field = "keyword", 
@@ -352,11 +417,8 @@ update_tags(index = "state_of_the_union",
             filters = list(title = "test"))
 ```
 
-```{r include=FALSE}
-Sys.sleep(5)
-```
-
 ```{r}
+#| eval: false
 query_documents(index = "state_of_the_union", 
                 fields = c("title", "keyword"),
                 filters = list(title = "test"))
@@ -371,13 +433,14 @@ amcat.update_document("state_of_the_union", doc_id=test_doc["_id"], body={"keywo
 ```
 
 ```{python}
+#| eval: false
 res=list(amcat.query("state_of_the_union", fields=["title", "keyword"], filters={"title": "test"}))
 pp.pprint(res)
 ```
 
 #### cURL
 
-```{bash}
+```{bash, eval=FALSE}
 #| eval: false
 test_doc=$(curl -s -X POST http://localhost/amcat/index/state_of_the_union/query \
   -H 'Content-Type: application/json' \
@@ -388,7 +451,7 @@ curl -s -X PUT http://localhost/amcat/index/state_of_the_union/documents/${test_
 ```
 
 
-```{bash}
+```{bash, eval=FALSE}
 curl -s -X POST http://localhost/amcat/index/state_of_the_union/query \
   -H 'Content-Type: application/json' \
   -d '{"filters":{"title":["test"]}}' | jq -r ".results"
@@ -402,6 +465,7 @@ Now that we have a better idea of what an index is and how it looks like, we can
 #### R
 
 ```{r}
+#| eval: false
 create_index(index = "new_index", guest_role = "admin")
 list_indexes()
 get_fields(index = "new_index")
@@ -415,13 +479,14 @@ amcat.create_index(index="new_index", guest_role="admin")
 ```
 
 ```{python}
+#| eval: false
 amcat.list_indices()
 amcat.get_fields("new_index")
 ```
 
 #### cURL
 
-```{bash}
+```{bash, eval=FALSE}
 #| eval: false
 curl -s -X POST http://localhost/amcat/index/ \
   -H 'Content-Type: application/json' \
@@ -431,7 +496,7 @@ curl -s -X POST http://localhost/amcat/index/ \
       }'
 ```
 
-```{bash}
+```{bash, eval=FALSE}
 curl -s http://localhost/amcat/index/
 curl -s http://localhost/amcat/index/new_index/fields
 ```
@@ -447,6 +512,7 @@ Or you can simply start uploading data:
 #### R
 
 ```{r}
+#| eval: false
 new_doc <- data.frame(
   title = "test",
   text = "test",
@@ -460,6 +526,7 @@ upload_documents(index = "new_index", new_doc)
 ```
 
 ```{r}
+#| eval: false
 get_fields(index = "new_index")
 ```
 
@@ -480,13 +547,14 @@ amcat.upload_documents("new_index", [new_doc])
 ```
 
 ```{python}
+#| eval: false
 amcat.get_fields("new_index")
 ```
 
 
 #### cURL
 
-```{bash}
+```{bash, eval=FALSE}
 #| eval: false
 curl -s -X POST http://localhost/amcat/index/new_index/documents \
   -H "Content-Type: application/json" \
@@ -505,7 +573,7 @@ curl -s -X POST http://localhost/amcat/index/new_index/documents \
       }'
 ```
 
-```{bash}
+```{bash, eval=FALSE}
 curl -s http://localhost/amcat/index/new_index/fields
 ```
 
@@ -521,6 +589,7 @@ Finally, we can also delete an index:
 
 #### R
 ```{r}
+#| eval: false
 delete_index(index = "new_index")
 ```
 
@@ -533,7 +602,7 @@ amcat.delete_index("new_index")
 
 #### cURL
 
-```{bash}
+```{bash, eval=FALSE}
 #| eval: false
 curl -s -X DELETE http://localhost/amcat/index/new_index
 ```
@@ -541,11 +610,11 @@ curl -s -X DELETE http://localhost/amcat/index/new_index
 
 ### A Note on the ID Field and Duplicated Documents
 
-amcat indexes can have all kinds of fields, yet one special field must be present in every document of every index: a unique ID.
+AmCAT indexes can have all kinds of fields, yet one special field must be present in every document of every index: a unique ID.
 This ID is usually not that noteworthy, since the user does not really need to take care of it.
 This changes, however, with the special case of duplicated documents, that is, a document with the exact same information in the same fields.
-amcat does not normally check if your documents are duplicated when you upload them.
-However, when no ID is present in an uploaded document, as in the example we uploaded above, amcat will construct a unique ID from the available data of a document.
+AmCAT does not normally check if your documents are duplicated when you upload them.
+However, when no ID is present in an uploaded document, as in the example we uploaded above, AmCAT will construct a unique ID from the available data of a document.
 Let us have another look at that document we titled "test":
 
 ::: {.panel-tabset}
@@ -553,26 +622,28 @@ Let us have another look at that document we titled "test":
 #### R
 
 ```{r}
+#| eval: false
 query_documents(index = "state_of_the_union", fields = NULL, filters = list(title = "test"))
 ```
 
 #### Python
 
 ```{python}
+#| eval: false
 res=list(amcat.query("state_of_the_union", fields=None, filters={"title": "test"}))
 pp.pprint(res)
 ```
 
 #### cURL
 
-```{bash}
+```{bash, eval=FALSE}
 curl -s -X POST http://localhost/amcat/index/state_of_the_union/query \
   -H 'Content-Type: application/json' \
   -d '{"filters":{"title":["test"]}}' | jq -r ".results"
 ```
 :::
 
-Note that amcat has automatically added an `_id` field (in `R` it is `.id` due to naming conventions) to the document.
+Note that AmCAT has automatically added an `_id` field (in `R` it is `.id` due to naming conventions) to the document.
 If we would upload the same document again, the algorithm that constructs the `_id` field would come up with the same value and the document would be replaced by the newly uploaded document.
 If we wanted to keep a duplicate for some reason, we could accomplish that by either changing at least one value in a field or by assigning an ID column manually:
 
@@ -580,6 +651,7 @@ If we wanted to keep a duplicate for some reason, we could accomplish that by ei
 
 #### R
 ```{r}
+#| eval: false
 new_doc <- data.frame(
   .id = "1",
   title = "test",
@@ -593,11 +665,8 @@ new_doc <- data.frame(
 upload_documents(index = "state_of_the_union", new_doc)
 ```
 
-```{r include=FALSE}
-Sys.sleep(5)
-```
-
 ```{r}
+#| eval: false
 query_documents(index = "state_of_the_union", fields = NULL, filters = list(title = "test"))
 ```
 
@@ -620,6 +689,7 @@ amcat.upload_documents("state_of_the_union", [new_doc])
 ```
 
 ```{python}
+#| eval: false
 res=list(amcat.query("state_of_the_union", fields=None, filters={"title": "test"}))
 pp.pprint(res)
 ```
@@ -627,7 +697,7 @@ pp.pprint(res)
 
 #### cURL
 
-```{bash}
+```{bash, eval=FALSE}
 #| eval: false
 curl -s -X POST http://localhost/amcat/index/state_of_the_union/documents \
   -H "Content-Type: application/json" \
@@ -647,7 +717,7 @@ curl -s -X POST http://localhost/amcat/index/state_of_the_union/documents \
       }'
 ```
 
-```{bash}
+```{bash, eval=FALSE}
 curl -s -X POST http://localhost/amcat/index/state_of_the_union/query \
   -H 'Content-Type: application/json' \
   -d '{"filters":{"title":["test"]}}' | jq -r ".results"
@@ -661,6 +731,7 @@ To simulate what would have happened without an ID, or rather if the ID had been
 
 #### R
 ```{r}
+#| eval: false
 new_doc <- data.frame(
   .id = "1",
   title = "test",
@@ -672,11 +743,8 @@ new_doc <- data.frame(
 upload_documents(index = "state_of_the_union", new_doc)
 ```
 
-```{r include=FALSE}
-Sys.sleep(5)
-```
-
 ```{r}
+#| eval: false
 query_documents(index = "state_of_the_union", fields = NULL, filters = list(title = "test"))
 ```
 
@@ -697,13 +765,14 @@ amcat.upload_documents("state_of_the_union", [new_doc])
 ```
 
 ```{python}
+#| eval: false
 res=list(amcat.query("state_of_the_union", fields=None, filters={"title": "test"}))
 pp.pprint(res)
 ```
 
 #### cURL
 
-```{bash}
+```{bash, eval=FALSE}
 #| eval: false
 curl -s -X POST http://localhost/amcat/index/state_of_the_union/documents \
   -H "Content-Type: application/json" \
@@ -721,7 +790,7 @@ curl -s -X POST http://localhost/amcat/index/state_of_the_union/documents \
       }'
 ```
 
-```{bash}
+```{bash, eval=FALSE}
 curl -s -X POST http://localhost/amcat/index/state_of_the_union/query \
   -H 'Content-Type: application/json' \
   -d '{"filters":{"title":["test"]}}' | jq -r ".results"
@@ -729,6 +798,6 @@ curl -s -X POST http://localhost/amcat/index/state_of_the_union/query \
 :::
 
 The document with the ID 1 has been replaced with the new data.
-This is the normal behaviour of amcat: when we tell it to add data to an already present document, identified by the ID, it will be replaced.
+This is the normal behaviour of AmCAT: when we tell it to add data to an already present document, identified by the ID, it will be replaced.
 If a field was present in the old document, but not in the data it is replaced with, this field will be empty afterwards.
 

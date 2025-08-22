@@ -8,28 +8,32 @@ title: "Getting started"
 Passages highlighted in red are likely to change soon.
 :::
 
-In this chapter, we show you how to set up the data layer and front-end of the amcat suite.
+In this chapter, we show you how to download, set up, and start AmCAT.
 
-![amcat instance after following this chapter](media/amcat-flow-getting-started.drawio.png)
+![AmCAT instance after following this chapter](media/amcat-flow-getting-started.drawio.png)
 
-In the [Data Layer](#data-Layer) section, it is sufficient if you choose one of the sub-sections to follow.
-We explain how you can run amcat 
+In the [Installing and accessing AmCAT](#Installing-and-accessing-AmCAT) section, it is sufficient if you choose one of the sub-sections to follow.
+We explain how you can run AmCAT 
 
 - [on our servers](#run-on-our-servers), which we recommend for testing purposes;
 - [through a Docker image](#setup-through-docker), which we recommend for most people who want to conduct a research project and/or share data online;
-- [or install amcat directly on your system](#setup-on-your-own-server), which we only recommend for advanced users, who want a customised setup.
+- [or install AmCAT directly on your system](#setup-on-your-own-server), which we only recommend for advanced users, who want a customised setup.
 
 In the [Frontend](#frontend) section, it makes sense to cover the [amcat4client](#amcat4client), which provides a react web interface to query data.
 Then you can select to either install the [R](#amcat4r) or [Python](#amcat4py) client.
 
-## Data Layer
+## Installing and accessing AmCAT
 ### Run on our servers
 
 ::: {.callout-important}
 # Coming soon...
 :::
 
-### Setup through Docker
+### AmCAT in your personal computer
+
+Let’s first install AmCAT in your computer. For this, you need to: 1.Install Docker, 2.Copy the "docker-compose.yml” file in your computer, and 3.Run the file via terminal. It sounds hard, but do not worry, I will visually walk you through each step.
+
+#### Install Docker
 
 ::: {.callout-tip}
 # Why do we use Docker for installation?
@@ -38,19 +42,92 @@ Technically, it is a little more complicated, as Docker containers have many sim
 However, for most users that technical background is not really important.
 If you want to learn more, have a look [here](https://www.docker.com/resources/what-container/).
 ]
-A side effect is that we can easily develop amcat for all operating systems at once and you can be sure that we do not fall behind on developing amcat for your operating system of choice.
+A side effect is that we can easily develop AmCAT for all operating systems at once and you can be sure that we do not fall behind on developing AmCAT for your operating system of choice.
 :::
 
-If you have never used Docker before, the first step is to install the infrastructure on your system.
-Head over to the Docker website to get [Docker Desktop](https://docs.docker.com/get-docker/) or the [Docker Engine](https://docs.docker.com/engine/install/) and [Docker Compose](https://docs.docker.com/compose/install/) to use Docker from the command line.^[On Ubuntu and Debian, the Docker Compose version in the repos is too old. You can use this gist to update it: <https://gist.github.com/JBGruber/db4de49ee106889b969a277f800c05b8>]
-We do not really need Docker Desktop, but it comes with both the Docker Engine and Docker Compose, which makes installation easier if you do not use a package manager (which many Windows and MacOS users do not).
+Docker is a software that allows easy creation and portability of software in something called containers. AmCAT is stored in one of such containers. To install it, you need to first install Docker: [https://www.docker.com/get-started/](https://www.docker.com/get-started/). To install Docker, you can head over to the Docker website to get [Docker Desktop](https://docs.docker.com/get-docker/) or the [Docker Engine](https://docs.docker.com/engine/install/) and [Docker Compose](https://docs.docker.com/compose/install/) to use Docker from the command line.^[On Ubuntu and Debian, the Docker Compose version in the repos is too old. You can use this gist to update it: <https://gist.github.com/JBGruber/db4de49ee106889b969a277f800c05b8>] For a visual guide, you can check the video Johannes Gruber (2024) made: [https://www.youtube.com/watch?v=iMyCdd5nP5U](https://www.youtube.com/watch?v=iMyCdd5nP5U). Remember that to use Docker, you do NOT need to create an account.
 
-To install the amcat data layer, you should use our Docker Compose file.
-You can get it from [here](https://raw.githubusercontent.com/ccs-amsterdam/amcat4docker/main/docker-compose.yml) (save the file as `docker-compose.yml`).
+Docker Desktop makes installation easier if you do not use a package manager (which many Windows and MacOS users do not). Docker Desktop looks like this:
+
+![Docker_Desktop](media/amcat-2.1.2_1.png){width=600}
+
+#### Copy the docker-compose.yml file in your computer
+
+To install the AmCAT data layer, you should use our Docker Compose file. You can get it from [here](https://raw.githubusercontent.com/ccs-amsterdam/amcat4docker/main/docker-compose.yml) (save the file as "docker-compose.yml").
+
+In general, Gruber (2024) explains how to copy a “docker-compose.yml” file depending on the Operating System (OS). Here, we visually follow the steps for the AmCAT “docker-compose.yml” using a Windows OS. Access the AmCAT “docker-compose.yml” here: [https://raw.githubusercontent.com/ccs-amsterdam/amcat4docker/main/docker-compose.yml](https://raw.githubusercontent.com/ccs-amsterdam/amcat4docker/main/docker-compose.yml). 
+
+![AmCAT_DockerCompose1](media/amcat-2.1.2_2.png){width=600}
+
+Now, press the right button of your mouse. That will display the following menu:
+
+![AmCAT_DockerCompose2](media/amcat-2.1.2_3.png){width=600}
+
+From there, press the option “Save Page As…” and save it in any location you want:
+
+![AmCAT_DockerCompose3](media/amcat-2.1.2_4.png){width=600}
+
+By default, Windows saves any “weird” file as “txt”:
+
+![AmCAT_DockerCompose4](media/amcat-2.1.2_5.png){width=600}
+
+So, we need to explicitly tell Windows that our file is a “yml” type. To do so, you need to press View/Show/File name extensions:
+
+![AmCAT_DockerCompose5](media/amcat-2.1.2_7.png){width=600}
+
+Now, you can see that Windows added the “txt” extension to the file:
+
+![AmCAT_DockerCompose6](media/amcat-2.1.2_8.png){width=600}
+
+All we need to do is to delete the extra ".txt":
+
+![AmCAT_DockerCompose7](media/amcat-2.1.2_9.png){width=600}
+
+Now the file type changes to “YML file”.
+
+
+#### Run the file via terminal
+
+Now, we will run the file via terminal. Gruber (2024) [https://www.youtube.com/watch?v=iMyCdd5nP5U](https://www.youtube.com/watch?v=iMyCdd5nP5U) shows how to do so depending on the OS. Here, we will do it for Windows.
+So, let’s open “Windows PowerShell”:
+
+![Windows Power Shell](media/amcat-2.1.2_10.png){width=600}
+
+This will open the following window:
+
+![Windows Power Shell](media/amcat-2.1.2_11.png){width=600}
+
+In here, we will: (a) move to the folder where the "docker-compose.yml” is, and (b) run the "docker-compose.yml” file.
+
+**(a) Move to the folder where the “docker-compose.yml” is**
+
+For that, you will use the command `cd` followed by the path where the file is. For example, mine is in the “Download” folder, therefore, my command looks like:
+
+![Change Directory](media/amcat-2.1.2_12.png){width=600}
+
+Now press enter. This will modify how the previous link looks like:
+
+![Change Directory2](media/amcat-2.1.2_13.png){width=600}
+
+**(b) Run the "docker-compose.yml” file**
+
+Now, you need to run the following command: 
+
+`docker-compose up --pull="missing" -d`
+
+![Docker compose](media/amcat-2.1.2_14.png){width=600}
+
+Once it finishes running, it will show the following:
+
+![Docker compose2](media/amcat-2.1.2_15.png){width=600}
+
+If you navigate to Docker Desktop, you will see that AmCAT, together with other dependencies, is now listed as a container under “downloads”:
+
+![Docker Desktop with AmCAT](media/amcat-2.1.2_16.png){width=600}
 
 We tried to write the file to contain sensible defaults for testing it locally.
-If you plan to work with amcat for a research project and/or plan to update the images in the future, you should have a look at the customization option.
-Oterwise you can continue.
+If you plan to work with AmCAT for a research project and/or plan to update the images in the future, you should have a look at the customization option.
+Otherwise, you can continue.
 
 ::: {.callout-note collapse=true}
 #### Customization
@@ -73,12 +150,12 @@ knitr::asis_output(paste0(
 Setting the containers up from `R` or `Python` uses the same settings.
 You can leave most lines as they are, but we want to draw your attention to a couple of settings you might want to change:
 
-- In lines `r grep("ports:", docker_compose)[1]:(grep("ports:", docker_compose) + 1)[1]`, we set the port to `80` on the host machine. This means you will be able to access the amcat client without specifying a port (80 is the default port your browser uses to access an address). If the port is already in use, the container will crash. In this case, change `80`to a different port and access amcat through, for example, `localhost:5000`.
+- In lines `r grep("ports:", docker_compose)[1]:(grep("ports:", docker_compose) + 1)[1]`, we set the port to `80` on the host machine. This means you will be able to access the AmCAT client without specifying a port (80 is the default port your browser uses to access an address). If the port is already in use, the container will crash. In this case, change `80`to a different port and access AmCAT through, for example, `localhost:5000`.
 - In lines `r grep("discovery.type", docker_compose):(grep("ES_JAVA_OPTS", docker_compose))`, we configured Elasticsearch to form a single-node cluster and use a maximum of 4GB memory.
 - In lines `r grep("volumes:", docker_compose):(grep("volumes:", docker_compose) + 1)` we suggested a setting so Elasticsearch will store your data on a volume on the host machine. **If you do not use this, your data will be destroyed when you remove the Elasticsearch container!**. We recommend this to make it easier to back up your database and reuse it with a different installation of Elasticsearch (e.g., after an update) in the future. However, the container will not run if it does not have proper access to this folder. See the comment to solve this. Note that the suggested local path is just an example. Learn more about this in the chapter [on backups and updates](#backup,-restore-and-update-amcat).
 :::
 
-To download and start the amcat containers (Elasticsearch, amcat4, and amcat4client) use one of the approaches below:
+Besides the comand line, it is possible to download and start the AmCAT containers (Elasticsearch, amcat4, and amcat4client) from R and python:
 
 ::: {.panel-tabset}
 #### Command Line
@@ -136,16 +213,42 @@ amcat4r::docker_lc()
 
 :::
 
-If you are using Docker Desktop (which we recommend only for local installations on e.g., Windows), you can also monitor the containers there:
-
-![All containers are running](media/docker-dektop-running.png)
-
 It might take a couple of seconds for Elasticsearch to start up.
-Then you can navigate to <http://localhost/> in your browser to access the amcat client.
 
-![First view of the amcat react app in your browser](media/amcat-1.png)
+## Access AmCAT
 
-Before you access your newly created amcat suite, you should first check the settings and change to your needs.
+Great! So far, we told you that you have installed AmCAT, but you cannot see it yet... AmCAT can be accessed via its Graphic User Interface (GUI) and via its Application Programming Interface (API). 
+
+::: {.callout-important}
+For AmCAT to work in Windows and MAC, Docker has to be running, i.e. open Docker Desktop. 
+:::
+
+
+### Accessing the GUI 
+
+Open your favorite browser (e.g. Chrome, Firefox, or Edge) and type: <http://localhost/>. 
+
+
+This will open a page that looks like:
+
+
+![First view of the AmCAT react app in your browser](media/amcat-2.2.1_1.png){width=600}
+
+From there, you should press  "Log in" to finish setting up your account, which will open a window that looks like:
+
+![AmCAT log in](media/amcat-2.2.1_2.png){width=600}
+
+Now, you can safely log in using your email. This will create a link that will be sent to the email you provided. Just click on it. This will display a window that looks like the one beneath, just press Authorize:
+
+![AmCAT Authorize](media/amcat-2.2.1_4.png){width=600}
+
+Now, you can just enter the server or check the [authentication options](#authentication-options):
+
+![AmCAT Authorize](media/amcat-2.2.1_5_2.png){width=600}
+
+#### Authentication options
+
+If you are thinking on giving access to others, then you should first check the settings and change to your needs.
 You can do this with `amcat4 config`:
 
 ::: {.panel-tabset}
@@ -176,40 +279,17 @@ docker exec -t amcat4 amcat4 add-admin admin@example.com
 ```
 :::
 
-You can also create an example data collection (which are called index in Elasticsearch):
-
-::: {.panel-tabset}
-#### Command Line
-
-```bash
-docker exec -t amcat4 amcat4 create-test-index
-```
-
-#### R
-
-```r
-docker_exec(id = "amcat4", "amcat4 create-test-index")
-```
-
-#### Python
-
-```python
-# coming soon
-```
-
-:::
-
 You can now use Middlecat to authenticate as the admin user:
 
-![After logging into the amcat react app in your browser](media/amcat-2-middlecat.png)
+![After logging into the AmCAT react app in your browser](media/amcat-2-middlecat.png)
 
-Now you can access the test index at `http://localhost/`:
+<!-- Now you can access the test index at `http://localhost/`: -->
 
-![After logging into the amcat react app in your browser](media/amcat-2-local.png)
+<!-- ![After logging into the amcat react app in your browser](media/amcat-2.2.1_5.png) -->
 
-### Setup on your own server
+## Setup on your own server
 
-If you decide not to go with Docker, for example, because you feel you need more control over what is happening, you can also run amcat on your system directly.
+If you decide not to go with Docker, for example, because you feel you need more control over what is happening, you can also run AmCAT on your system directly.
 We do not recommend this anymore and have, in fact, switched our own servers over to use the Docker images.
 If there is something wrong with the images or you simply want to customise the setup, we suggest you head over to the [GitHub repo](https://github.com/ccs-amsterdam/amcat4docker) and change the files as you like.
 
@@ -218,9 +298,9 @@ We assume that if you are going this route, you are running a Linux server.
 Below we show one example setup.
 Obviously feel free to replace the suggested Linux tools like *systemd* or *nginx* with your own choice.
 
-#### amcat4 -- aka amcat server
+#### amcat4 -- aka AmCAT server
 
-The first piece to set up is the amcat server and the Elasticsearch database it interacts with.
+The first piece to set up is the AmCAT server and the Elasticsearch database it interacts with.
 To download and install Elasticsearch, refer to [their website](https://www.elastic.co/downloads/elasticsearch), or, preferably, install it through a package manager. 
 For example, if you are running Debian or Ubuntu or another distro which uses `apt` you can install Elasticsearch 7.x (which we are currently working with) like this:
 
@@ -285,7 +365,7 @@ curl -X GET 'http://localhost:9200'
 #> } 
 ```
 
-Next, you want to setup the amcat server.
+Next, you want to setup the AmCAT server.
 You can do this wherever you like, but we will set things up at `/srv/amcat`:
 
 ```bash
@@ -313,13 +393,13 @@ env/bin/python -m amcat4 run
 #> [INFO   :uvicorn.error  ] Uvicorn running on http://0.0.0.0:5000 (Press CTRL+C to quit)
 ```
 
-To check and adapt the settings of amcat use:
+To check and adapt the settings of AmCAT use:
 
 ```bash
 env/bin/python -m amcat4 config
 ```
 
-Since you probably don't want to run amcat in an open ssh tab all the time, you should set it up as a service, for example, with `systemd`.
+Since you probably don't want to run AmCAT in an open ssh tab all the time, you should set it up as a service, for example, with `systemd`.
 So head over to `/etc/systemd/system` and create a new file, for example, `amcat.service`.
 
 Here is a small example to set things up:
@@ -356,8 +436,8 @@ Restart=always
 WantedBy=multi-user.target
 ```
 
-In the above service, we run the amcat server as the user `amcat`.
-To create this user and hand over the ownership of the amcat server folder to it use:
+In the above service, we run the AmCAT server as the user `amcat`.
+To create this user and hand over the ownership of the AmCAT server folder to it use:
 
 ```bash
 sudo useradd amcat
@@ -396,12 +476,12 @@ If something went wrong, you can troubleshoot with `sudo journalctl -eu amcat.se
 ### amcat4client
 
 ::: {.callout-note}
-If you are using amcat on our servers or through Docker, you can skip this section and move on to install an API client to start managing amcat from either the [R](#amcat4r) or [Python](#amcat4py).
+If you are using AmCAT on our servers or through Docker, you can skip this section and move on to install an API client to start managing AmCAT from either the [R](#amcat4r) or [Python](#amcat4py).
 :::
 
-If you have checked port 5000 of your new amcat server while testing it above (i.e., `http://0.0.0.0:5000`), you were probably disappointed by a simple `{"detail":"Not Found"}` message.
+If you have checked port 5000 of your new AmCAT server while testing it above (i.e., `http://0.0.0.0:5000`), you were probably disappointed by a simple `{"detail":"Not Found"}` message.
 This is because the client has been split from the main package to make it easier to develop.
-You can install the React client next to amcat in`/srv/amcat4client` using:
+You can install the React client next to AmCAT in`/srv/amcat4client` using:
 
 ```bash
 cd /srv/
@@ -436,13 +516,13 @@ After that, you can build the React app:
 npm run build
 ```
 
-If your amcat instance will be publicly reachable, you can build the React app permanently attached to only your instance of amcat:
+If your AmCAT instance will be publicly reachable, you can build the React app permanently attached to only your instance of AmCAT:
 
 ```bash
 REACT_APP_FIXED_HOST=https://example.com/api npm run build
 ```
 
-Once this has finished, you should hand over ownership of the React application to the previously created amcat user
+Once this has finished, you should hand over ownership of the React application to the previously created AmCAT user
 
 ```bash
 sudo chown -R amcat:amcat .
@@ -450,7 +530,7 @@ sudo chown -R amcat:amcat .
 
 Now we have an Elasticsearch and amcat4 running. 
 But they are currently not accesible.
-To solve this, we can use, for example, `nginx` to provide users access to the React frontend and the amcat API.
+To solve this, we can use, for example, `nginx` to provide users access to the React frontend and the AmCAT API.
 Create a new `nginx` config file with, for example, nano:
 
 ```bash
@@ -498,7 +578,7 @@ upstream amcat {
 :::{.callout-warning}
 # warning about http
 
-This setup assumes that your amcat sever will only be available in the local network.
+This setup assumes that your AmCAT sever will only be available in the local network.
 If it should be accesible via the internet, we **strongly** recommend to enable https.
 You can find more information about that on the [`nginx` website](http://nginx.org/en/docs/http/configuring_https_servers.html) or [this guide](https://www.techrepublic.com/article/how-to-enable-ssl-on-nginx/).
 :::
@@ -522,13 +602,13 @@ curl http://localhost:5000/api/
 #> {"detail":"Not Found"}
 ```
 
-If everything works, you can now access the client at [http://localhost:5000](http://localhost:5000), or the address of your server, if you installed amcat remotely:
+If everything works, you can now access the client at [http://localhost:5000](http://localhost:5000), or the address of your server, if you installed AmCAT remotely:
 
-![First view of the amcat react app in your browser](media/amcat-1.png)
+![First view of the AmCAT react app in your browser](media/amcat-1.png)
 
 The React app is always running locally in your browser, even if you've accessed it on another computer.
-So the appropriate host needs to be the route to the amcat server.
-In the example above, I set up an amcat instance in my local network on a computer with the IP address `192.168.2.180` and port `5000`.
+So the appropriate host needs to be the route to the AmCAT server.
+In the example above, I set up an AmCAT instance in my local network on a computer with the IP address `192.168.2.180` and port `5000`.
 To access that host, you need to enter:
 
 ::: {.callout-note}
@@ -541,9 +621,9 @@ Password: "admin"
 
 :::
 
-Just replace `192.168.2.180` with the address of the machine you set up amcat on.
+Just replace `192.168.2.180` with the address of the machine you set up AmCAT on.
 
-![After logging into the amcat react app in your browser](media/amcat-2-remote.png)
+![After logging into the AmCAT react app in your browser](media/amcat-2-remote.png)
 
 Success! However, the interface doesn't show much at this point, since we added no data yet.
 We will do that in the [storage chapter](#document-storage).
@@ -560,7 +640,7 @@ The `R` client is called `amcat4r` and can be installed via the following comman
 remotes::install_github("ccs-amsterdam/amcat4r")
 ```
 
-If you have set up the amcat suite as shown above, you should be able to log into the database:
+If you have set up the AmCAT suite as shown above, you should be able to log into the database:
 
 ```{r}
 #| eval: false
