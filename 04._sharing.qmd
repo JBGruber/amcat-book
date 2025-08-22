@@ -14,13 +14,13 @@ In AmCAT, there are four types of roles:
 * Admin: It is a user that can modify other users' roles and perform any changes to the data.
 * Writer: A user that can modify the data.
 * Reader: A user that can see the data.
-* Metareader: A user that can see all the data fields, except the text.
+* Metareader: A user that can see all the data fields, but only a snippet of the text.
 
-You can add users with their respective roles using the Graphic User Interface (GUI) or via the Application Programming Interface (API). 
+You can add users with their respective roles using the [Graphic User Interface (GUI)](#access-managament-via-the-graphic-user-interface) or via the [Application Programming Interface (API)](#access-managament-via-the-application-programming-interface). 
 
 ### Access Managament via the Graphic User Interface
 
-To modify the access to an index, the index has to already exist. For this example, I will refer to the index "Example Index" that we created in chapter [Document Storage](#03._storage). Nevertheless, all the steps apply to any database.
+To modify the access to an index, the index has to already exist. For this example, I will refer to the index "Example Index" that we created in chapter 3 [Document Storage](#03._storage). Nevertheless, all the steps apply to any other index.
 
 Go ahead and open the index by clicking on it:
 
@@ -30,11 +30,17 @@ From there navigate to "Index Admin" ![](media/amcat-4.1-2.png) located at the t
 
 ![](media/amcat-4.1-3.png)
 
-As you can see, the default settings is that yours and the guest's roles are Metareaders. This means that both of you can only access the date, title, url etc, and snippets of the text when you search. 
+The default settings is that yours and the guest's roles are Metareaders. This means that both of you can only access the date, title, url etc, and snippets of the text when you search. 
 
 To change these roles, you can navigate to "Users". This will open the following window:
 
 ![](media/amcat-4.1-4.png)
+From there, you can add a user by clicking "Add user" ![](media/amcat-4.1-5.png), which will pop up the following window:
+
+![](media/amcat-4.1-6.png)
+
+Now, you can add all the users' emails, including your, with their respective roles. Click "Create" when you are done. To see the changes applied, you need to log-off and log-in again. 
+
 
 
 ### Access Managament via the Application Programming Interface
@@ -76,5 +82,4 @@ delete_index_user()
 modify_index_user()
 ```
 
-### Roles and Guest Roles
 
