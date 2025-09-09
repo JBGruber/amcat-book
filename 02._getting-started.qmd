@@ -131,7 +131,7 @@ Otherwise, you can continue.
 
 ::: {.callout-note collapse=true}
 #### Customization
-
+ 
 The current default docker-compose.yml looks like this:
 
 ```{r, echo=FALSE}
