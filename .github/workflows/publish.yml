@@ -40,7 +40,8 @@ jobs:
       - name: Install R Dependencies 
         uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          any::knitr
+          packages:
+            any::knitr
       
       - name: Setup reticulate
         shell: Rscript {0}
