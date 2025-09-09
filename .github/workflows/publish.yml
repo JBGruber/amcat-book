@@ -41,8 +41,8 @@ jobs:
         uses: r-lib/actions/setup-r-dependencies@v2
         with:
           packages:
-            any::knitr
-            any:rmarkdown
+            cran::knitr
+            cran:rmarkdown
       
       - name: Setup reticulate
         shell: Rscript {0}
