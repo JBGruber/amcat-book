@@ -1,11 +1,11 @@
 ---
-title: "Document Sharing and Access Management"
+title: "Access Management and Document Sharing"
 execute:
   eval: false
 bibliography: references.bib
 ---
 
-In this chapter, we describe the different roles you can get a give to access your datasets. Roles are important because they determine how much users can view and modify in your data.
+In this chapter, we describe the different roles you can get a give to access your indexes, and how to use them to safely share your data. Roles are important because they determine how much users can view and modify in your data.
 
 ## Access Management
 
@@ -81,5 +81,9 @@ delete_index_user()
 #| eval: false
 modify_index_user()
 ```
+
+## Document Sharing
+
+
 
 

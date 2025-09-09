@@ -113,7 +113,7 @@ Now press enter. This will modify how the previous link looks like:
 
 Now, you need to run the following command: 
 
-`docker-compose up --pull="missing" -d`
+`# docker-compose up --pull="missing" -d`
 
 ![Docker compose](media/amcat-2.1.2_14.png){width=600}
 
@@ -134,8 +134,7 @@ Otherwise, you can continue.
 
 The current default docker-compose.yml looks like this:
 
-```{r}
-#| echo: false
+```{r, echo=FALSE}
 docker_compose <- readLines("https://raw.githubusercontent.com/ccs-amsterdam/amcat4docker/main/docker-compose.yml")
 knitr::asis_output(paste0(
   "``` {.bash code-line-numbers=\"true\"}\n",
@@ -163,13 +162,14 @@ Besides the comand line, it is possible to download and start the AmCAT containe
 Start a terminal and navigate to the directory where you downloaded the docker-compose.yml file^[The yaml file is written for Docker Compose V2. If you are having trouble, check your version with `docker-compose --version`. [Get the newest version as described here.](https://docs.docker.com/compose/install/other/)]:
 
 ```bash
-docker-compose up --pull="missing" -d
+# docker-compose up --pull="missing" -d
 ```
+
 
 Check if the containers are running with:
 
 ```bash
-docker ps
+# docker ps
 #> CONTAINER ID   IMAGE                                                  COMMAND                  CREATED              STATUS          PORTS                                   NAMES
 #> 0628bc852c79   ccsamsterdam/amcat4client:0.0.1                        "nginx -g 'daemon of…"   About a minute ago   Up 58 seconds   0.0.0.0:80->5000/tcp, :::80->5000/tcp   amcat4client
 #> 8134bcd1cbe8   ccsamsterdam/amcat4:0.0.1                              "./wait-for-it.sh el…"   About a minute ago   Up 59 seconds   5000/tcp                                amcat4
@@ -182,20 +182,20 @@ docker ps
 # install the required packages first:
 # remotes::install_github("JBGruber/dockr")
 # remotes::install_github("ccs-amsterdam/amcat4r")
-amcat4r::run_amcat_docker()
+# amcat4r::run_amcat_docker()
 ```
 
 This pulls downloads the default `docker-compose.yml` file from the same link as above.
 If you want to change the file first, just supply the path to the function afterwards:
 
 ```r
-amcat4r::run_amcat_docker("docker-compose.yml")
+# amcat4r::run_amcat_docker("docker-compose.yml")
 ```
 
 Check if the containers are running with:
 
 ```r
-amcat4r::docker_lc()
+# amcat4r::docker_lc()
 #> # A tibble: 3 × 5
 #>   name          image                                                status        id                                       ports
 #>   <chr>         <chr>                                                <chr>         <chr>                                    <list>
@@ -255,7 +255,7 @@ You can do this with `amcat4 config`:
 #### Command Line
 
 ```bash
-docker exec -it amcat4 amcat4 config
+# docker exec -it amcat4 amcat4 config
 ```
 
 ![Configuring amcat4](media/config.png)
@@ -263,7 +263,7 @@ docker exec -it amcat4 amcat4 config
 If you choose anything but `no_auth` for authentification options, you should also add a global admin user via:
 
 ```bash
-docker exec -t amcat4 amcat4 add-admin admin@example.com
+# docker exec -t amcat4 amcat4 add-admin admin@example.com
 ```
 
 #### R
@@ -305,16 +305,16 @@ To download and install Elasticsearch, refer to [their website](https://www.elas
 For example, if you are running Debian or Ubuntu or another distro which uses `apt` you can install Elasticsearch 7.x (which we are currently working with) like this:
 
 ```bash
-curl -fsSL https://artifacts.elastic.co/GPG-KEY-elasticsearch | sudo gpg --dearmor -o /usr/share/keyrings/elastic.gpg
-echo "deb [signed-by=/usr/share/keyrings/elastic.gpg] https://artifacts.elastic.co/packages/7.x/apt stable main" | sudo tee -a /etc/apt/sources.list.d/elastic-7.x.list
-sudo apt update
-sudo apt install elasticsearch
+# curl -fsSL https://artifacts.elastic.co/GPG-KEY-elasticsearch | sudo gpg --dearmor -o /usr/share/keyrings/elastic.gpg
+# echo "deb [signed-by=/usr/share/keyrings/elastic.gpg] https://artifacts.elastic.co/packages/7.x/apt stable main" | sudo tee -a /etc/apt/sources.list.d/elastic-7.x.list
+# sudo apt update
+# sudo apt install elasticsearch
 ```
 
 In the next step, you need to configure Elasticsearch:
 
 ```bash
-sudo nano /etc/elasticsearch/elasticsearch.yml
+# sudo nano /etc/elasticsearch/elasticsearch.yml
 ```
 
 Configure the database to your own liking in terms of user management and exposure.
@@ -323,29 +323,29 @@ Since we are controlling it through `amcat4`, the only two things that really ma
 So within `elasticsearch.yml`, we only look for two lines:
 
 ```bash
-network.host: localhost
-...
-http.port: 9200
+# network.host: localhost
+#...
+# http.port: 9200
 ```
 
 You can configure the memory usage of Elasticsearch
 
 ```bash
-echo "-Xms4g" | sudo tee -a /etc/elasticsearch/jvm.options.d/memory.options
+# echo "-Xms4g" | sudo tee -a /etc/elasticsearch/jvm.options.d/memory.options
 ```
 
 Leaving the values at their defaults here, we can enable the systemd service (skip this step if you've installed Elasticsearch through Docker):
 
 ```bash
-sudo systemctl daemon-reload
-sudo systemctl enable elasticsearch
-sudo systemctl start elasticsearch
+# sudo systemctl daemon-reload
+# sudo systemctl enable elasticsearch
+# sudo systemctl start elasticsearch
 ```
 
 You can check if everything is working with:
 
 ```bash
-curl -X GET 'http://localhost:9200'
+# curl -X GET 'http://localhost:9200'
 #> {
 #>   "name" : "amcat-opted-trekdrop0",
 #>   "cluster_name" : "amcat-opted",
