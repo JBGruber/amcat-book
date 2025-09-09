@@ -123,7 +123,7 @@ Once it finishes running, it will show the following:
 
 If you navigate to Docker Desktop, you will see that AmCAT, together with other dependencies, is now listed as a container under “downloads”:
 
-![Docker Desktop with AmCAT](media/amcat-2.1.2_16.png){width=600}
+![Docker Desktop with AmCAT](media/docker-dektop-running.png){width=600}
 
 We tried to write the file to contain sensible defaults for testing it locally.
 If you plan to work with AmCAT for a research project and/or plan to update the images in the future, you should have a look at the customization option.
