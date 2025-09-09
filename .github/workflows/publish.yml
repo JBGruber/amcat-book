@@ -48,10 +48,6 @@ jobs:
         run: |
           install.packages('reticulate')
           
-      - name: add index to amcat
-        shell: bash
-        run: |
-          docker exec -t render-amcat4 amcat4 create-test-index
           
       - name: Render Quarto Project
         env:
