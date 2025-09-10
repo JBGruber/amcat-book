@@ -43,6 +43,7 @@ jobs:
           packages:
             any::knitr
             any::rmarkdown
+            any::reticulate
       
       - name: Setup reticulate
         shell: Rscript {0}
